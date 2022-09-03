@@ -1,0 +1,19 @@
+{
+  "name": "arbo",
+  "version": "1.0.0",
+  "description": "Arbo a game in which you get back digitally for nurturing the environment. All profits will be used to buy toucan carbon credits <p align=\"center\">   <img src=\"./assets/imgs/arbo.png\"/> </p>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shaddamciv/arbo.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shaddamciv/arbo/issues"
+  },
+  "homepage": "https://github.com/shaddamciv/arbo#readme"
+}
