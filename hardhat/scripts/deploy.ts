@@ -1,18 +1,13 @@
 import { ethers } from "hardhat";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  const Grow = await ethers.getContractFactory("Grow");
+  const grow = await Grow.deploy("0x840c23e39f9d029ffa888f47069aa6864f0401d7");
 
-  const lockedAmount = ethers.utils.parseEther("1");
+  await grow.deployed();
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-  await lock.deployed();
-
-  console.log(`Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`);
+  console.log(`grow  deployed to ${grow.address}`);
+  console.log("npx hardhat verify --network mumbai", grow.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
