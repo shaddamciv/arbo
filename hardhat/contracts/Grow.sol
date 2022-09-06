@@ -3,7 +3,6 @@ pragma solidity ^0.8.13;
 
 import "usingtellor/contracts/UsingTellor.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {ISuperfluid, IInstantDistributionAgreementV1, IConstantFlowAgreementV1, StreamInDistributeOut, ISuperToken} from "./base/StreamInDistributeOut.sol";
 
 
 // Uncomment this line to use console.log
@@ -23,26 +22,12 @@ contract Grow is UsingTellor {
 
 
     constructor(
-        address payable _tellor,
-        ISuperfluid host,
-        IConstantFlowAgreementV1 cfa,
-        IInstantDistributionAgreementV1 ida,
-        ISuperToken inToken,
-        ISuperToken outToken,
-        IUniswapV2Router02 router
-        ) UsingTellor(_tellor) StreamInDistributeOut(host, cfa, ida, inToken, outToken)  {
+        address payable _tellor
+        ) UsingTellor(_tellor)  {
         //initial Seed of the plant
         seedTime = block.timestamp;
         emit Reseeded(msg.sender, 0, 0);
         owner = msg.sender;
-
-        _router = router;
-
-        // approve router to transfer the underlying `inToken` on behalf of this contract
-        IERC20(inToken.getUnderlyingToken()).approve(address(router), type(uint256).max);
-
-        // approve `outToken` to upgrade the underlying `outToken` on behalf of this contract.
-        IERC20(outToken.getUnderlyingToken()).approve(address(outToken), type(uint256).max);
     }
 
     function waterArbo() public payable {
@@ -64,22 +49,4 @@ contract Grow is UsingTellor {
     
     }
 
-    // ---------------------------------------------------------------------------------------------
-    // BEFORE DISTRIBUTION CALLBACK
-
-    /// @dev Before action callback. This swaps the `inToken` for the `outToken`, then returns the
-    /// amount to distribute out in the `executeAction` function.
-    /// @return distributionAmount amount to distribute after the callback.
-    function _beforeDistribution() internal override returns (uint256 distributionAmount) {
-        // Downgrade the full balance of the `_inToken`.
-        _inToken.downgrade(_inToken.balanceOf(address(this)));
-
-        
-        // Get the full balance of the underlying `_outToken`.
-        // Implicitly return the `upgrade`d amount by the end of the function.
-        distributionAmount = IERC20(_inToken.balanceOf(address(this)));
-
-        //Upgrade the full underlying `_outToken` balance.
-        _outToken.upgrade(distributionAmount);
-    }
 }
