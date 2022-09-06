@@ -1,8 +1,8 @@
 {
-  "name": "obj_tree_title",
+  "name": "obj_tree",
   "spriteId": {
-    "name": "spr_tree_01",
-    "path": "sprites/spr_tree_01/spr_tree_01.yy",
+    "name": "spr_planta_0_1",
+    "path": "sprites/spr_planta_0_1/spr_planta_0_1.yy",
   },
   "spriteMaskId": null,
   "visible": true,
@@ -22,15 +22,12 @@
   "physicsStartAwake": true,
   "physicsKinematic": false,
   "physicsShapePoints": [],
-  "eventList": [
-    {"isDnD":false,"eventNum":0,"eventType":0,"collisionObjectId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMEvent",},
-    {"isDnD":false,"eventNum":13,"eventType":9,"collisionObjectId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMEvent",},
-  ],
+  "eventList": [],
   "properties": [],
   "overriddenProperties": [],
   "parent": {
-    "name": "01_Title",
-    "path": "folders/Objects/01_Title.yy",
+    "name": "02_Main",
+    "path": "folders/Objects/02_Main.yy",
   },
   "resourceVersion": "1.0",
   "tags": [],

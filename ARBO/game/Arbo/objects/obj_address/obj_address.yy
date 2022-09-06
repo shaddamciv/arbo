@@ -32,8 +32,8 @@
   "properties": [],
   "overriddenProperties": [],
   "parent": {
-    "name": "Title_screen",
-    "path": "folders/Objects/Title_screen.yy",
+    "name": "01_Title",
+    "path": "folders/Objects/01_Title.yy",
   },
   "resourceVersion": "1.0",
   "tags": [],

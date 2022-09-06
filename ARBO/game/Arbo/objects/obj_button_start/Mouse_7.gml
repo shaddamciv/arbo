@@ -6,3 +6,4 @@ if (global.user_address=="0") {
 	oController.alarm[0]=1;
 }
 
+room_goto(rm_main);
