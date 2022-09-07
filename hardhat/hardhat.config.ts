@@ -6,6 +6,7 @@ import "@nomicfoundation/hardhat-toolbox";
 
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-web3";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
@@ -34,7 +35,7 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [ 
       {
-        version: "0.8.9",
+        version: "0.8.13",
         settings: {},
       },
     ],

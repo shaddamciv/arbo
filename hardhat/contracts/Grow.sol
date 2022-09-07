@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.13;
 
 import "usingtellor/contracts/UsingTellor.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 
 // Uncomment this line to use console.log
 import "hardhat/console.sol";
@@ -19,7 +21,9 @@ contract Grow is UsingTellor {
     bytes32 public maticQueryId = 0x40aa71e5205fdc7bdb7d65f7ae41daca3820c5d3a8f62357a99eda3aa27244a3;
 
 
-    constructor(address payable _tellor) UsingTellor(_tellor) {
+    constructor(
+        address payable _tellor
+        ) UsingTellor(_tellor)  {
         //initial Seed of the plant
         seedTime = block.timestamp;
         emit Reseeded(msg.sender, 0, 0);
@@ -44,4 +48,5 @@ contract Grow is UsingTellor {
         console.log("matic Price  - %d ", maticPrice);
     
     }
+
 }
