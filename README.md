@@ -1,7 +1,7 @@
 # ARBO
 ARBO a game in which you get back digitally for nurturing the environment. All profits will be used to buy toucan carbon credits
 <p align="center">
-  <img src="./assets/imgs/arbo.png"/>
+  <img src="./assets/imgs/arbo.gif"/>
 </p>
 
 ## Folder structure
