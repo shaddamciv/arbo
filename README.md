@@ -20,3 +20,4 @@ The data is written to the smart contracts and if ever data is needed to be writ
 All final states will be maintained on chain. 
 
 
+/// TODO: How to stop the flow on a condition
