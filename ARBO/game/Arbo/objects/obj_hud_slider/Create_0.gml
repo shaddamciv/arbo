@@ -3,3 +3,4 @@
 aberto = false;
 clicou = false;
 
+xStart = x;

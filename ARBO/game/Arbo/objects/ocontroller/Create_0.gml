@@ -22,5 +22,3 @@ or:
 <script src="html5game/uph_web3.min.js"></script>
 
 */
-
-

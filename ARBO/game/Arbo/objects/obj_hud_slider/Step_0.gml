@@ -1,25 +1,7 @@
 /// @description Insert description here
 // You can write your code in this editor
 
-if(aberto==false && clicou)
-{
+if(aberto) x= lerp(x,xStart-104,0.1)
+else x =lerp(x,xStart,0.1)
 
-	x= lerp(x,x-92,0.03)
-	if(x<=264)
-	{
-		aberto = true;
-		clicou = false;
-	}
-}
-else if(aberto == true && clicou)
-{
-	x =lerp(x,x+92,0.03)
-	if(x>=366)
-	{
-		aberto = false;
-		clicou = false;
-	}
-	
-}
-
-
+if(clicou) clicou = false;

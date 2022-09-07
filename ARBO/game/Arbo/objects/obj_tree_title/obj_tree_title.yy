@@ -1,16 +1,15 @@
 {
-  "name": "obj_tree_title",
   "spriteId": {
-    "name": "spr_tree_01",
-    "path": "sprites/spr_tree_01/spr_tree_01.yy",
+    "name": "spr_tree_02",
+    "path": "sprites/spr_tree_02/spr_tree_02.yy",
   },
-  "spriteMaskId": null,
-  "visible": true,
   "solid": false,
-  "persistent": false,
-  "physicsObject": false,
+  "visible": true,
   "managed": true,
+  "spriteMaskId": null,
+  "persistent": false,
   "parentObjectId": null,
+  "physicsObject": false,
   "physicsSensor": false,
   "physicsShape": 1,
   "physicsGroup": 1,
@@ -22,10 +21,7 @@
   "physicsStartAwake": true,
   "physicsKinematic": false,
   "physicsShapePoints": [],
-  "eventList": [
-    {"isDnD":false,"eventNum":0,"eventType":0,"collisionObjectId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMEvent",},
-    {"isDnD":false,"eventNum":13,"eventType":9,"collisionObjectId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMEvent",},
-  ],
+  "eventList": [],
   "properties": [],
   "overriddenProperties": [],
   "parent": {
@@ -33,6 +29,7 @@
     "path": "folders/Objects/01_Title.yy",
   },
   "resourceVersion": "1.0",
+  "name": "obj_tree_title",
   "tags": [],
   "resourceType": "GMObject",
 }
