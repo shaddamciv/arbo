@@ -107,7 +107,7 @@ beforeEach(async function () {
 
 describe("sending flows", async function () {
     it("Case #1 - Alice sends a flow", async () => {
-        console.log(Tree.address)
+        console.log("Tree address - ",Tree.address, "Alice's Address is - ", accounts[0].address)
 
         const appInitialBalance = await daix.balanceOf({
             account: Tree.address,

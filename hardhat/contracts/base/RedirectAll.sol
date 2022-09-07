@@ -9,6 +9,8 @@ import {IConstantFlowAgreementV1} from "@superfluid-finance/ethereum-contracts/c
 
 import {SuperAppBase} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperAppBase.sol";
 
+import "hardhat/console.sol";
+
 /// @dev Constant Flow Agreement registration key, used to get the address from the host.
 bytes32 constant CFA_ID = keccak256("org.superfluid-finance.agreements.ConstantFlowAgreement.v1");
 
@@ -46,8 +48,6 @@ contract RedirectAll is SuperAppBase {
     address public _receiver;
     bytes32 constant public CFA_ID = keccak256("org.superfluid-finance.agreements.ConstantFlowAgreement.v1");
 
-    using CFAv1Library for CFAv1Library.InitData;
-    CFAv1Library.InitData cfaV1; //initialize cfaV1 variable
     constructor(
         ISuperfluid host,
         ISuperToken acceptedToken,
@@ -141,10 +141,11 @@ contract RedirectAll is SuperAppBase {
         onlyHost
         returns (bytes memory newCtx)
     {
-        // ISuperfluid.Context memory decompiledContext = cfaV1.host.decodeCtx(_ctx);
-        // uData = decompiledContext;
+        ISuperfluid.Context memory decompiledContext = cfaV1Lib.host.decodeCtx(_ctx);
+        uData = decompiledContext;
 
-        // sender = decompiledContext.msgSender;
+        sender = decompiledContext.msgSender;
+        console.log("The sender of the flow is - %s", sender);
         return _updateOutflow(_ctx);
     }
 
@@ -162,10 +163,11 @@ contract RedirectAll is SuperAppBase {
         onlyHost
         returns (bytes memory newCtx)
     {
-        // ISuperfluid.Context memory decompiledContext = cfaV1.host.decodeCtx(_ctx);
-        // uData = decompiledContext;
+        ISuperfluid.Context memory decompiledContext = cfaV1Lib.host.decodeCtx(_ctx);
+        uData = decompiledContext;
 
-        // sender = decompiledContext.msgSender;
+        sender = decompiledContext.msgSender;
+        console.log("The updated sender of the flow is - %s", sender);
         return _updateOutflow(_ctx);
     }
 
@@ -218,6 +220,7 @@ contract RedirectAll is SuperAppBase {
     /// net flow rate.
     /// @param ctx The context byte array from the Host's calldata.
     /// @return newCtx The new context byte array to be returned to the Host.
+    /// TODO: How to stop the flow on a condition
     function _updateOutflow(bytes calldata ctx) private returns (bytes memory newCtx) {
         newCtx = ctx;
 
