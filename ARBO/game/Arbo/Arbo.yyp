@@ -12,6 +12,7 @@
     {"id":{"name":"spr_tree_01","path":"sprites/spr_tree_01/spr_tree_01.yy",},"order":1,},
     {"id":{"name":"spr_tree_02","path":"sprites/spr_tree_02/spr_tree_02.yy",},"order":2,},
     {"id":{"name":"obj_address","path":"objects/obj_address/obj_address.yy",},"order":4,},
+    {"id":{"name":"ChangeLog","path":"notes/ChangeLog/ChangeLog.yy",},"order":0,},
     {"id":{"name":"btn_send","path":"sprites/btn_send/btn_send.yy",},"order":2,},
     {"id":{"name":"spr_bg_04","path":"sprites/spr_bg_04/spr_bg_04.yy",},"order":0,},
     {"id":{"name":"rm_main","path":"rooms/rm_main/rm_main.yy",},"order":1,},

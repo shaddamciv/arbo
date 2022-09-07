@@ -1,7 +1,7 @@
 {
   "spriteId": {
-    "name": "spr_under_hud_encaixe",
-    "path": "sprites/spr_under_hud_encaixe/spr_under_hud_encaixe.yy",
+    "name": "spr_button_title_start",
+    "path": "sprites/spr_button_title_start/spr_button_title_start.yy",
   },
   "solid": false,
   "visible": true,
@@ -23,17 +23,20 @@
   "physicsShapePoints": [],
   "eventList": [
     {"isDnD":false,"eventNum":0,"eventType":0,"collisionObjectId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMEvent",},
-    {"isDnD":false,"eventNum":0,"eventType":3,"collisionObjectId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMEvent",},
+    {"isDnD":false,"eventNum":10,"eventType":6,"collisionObjectId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMEvent",},
     {"isDnD":false,"eventNum":4,"eventType":6,"collisionObjectId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMEvent",},
+    {"isDnD":false,"eventNum":11,"eventType":6,"collisionObjectId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMEvent",},
+    {"isDnD":false,"eventNum":7,"eventType":6,"collisionObjectId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMEvent",},
+    {"isDnD":false,"eventNum":0,"eventType":3,"collisionObjectId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMEvent",},
   ],
   "properties": [],
   "overriddenProperties": [],
   "parent": {
-    "name": "02_Main",
-    "path": "folders/Objects/02_Main.yy",
+    "name": "01_Title",
+    "path": "folders/Objects/01_Title.yy",
   },
   "resourceVersion": "1.0",
-  "name": "obj_hud_slider",
+  "name": "obj_button",
   "tags": [],
   "resourceType": "GMObject",
 }

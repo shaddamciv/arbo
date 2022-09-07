@@ -1,7 +1,7 @@
 {
   "spriteId": {
-    "name": "spr_under_hud_encaixe",
-    "path": "sprites/spr_under_hud_encaixe/spr_under_hud_encaixe.yy",
+    "name": "spr_button_marker",
+    "path": "sprites/spr_button_marker/spr_button_marker.yy",
   },
   "solid": false,
   "visible": true,
@@ -22,18 +22,17 @@
   "physicsKinematic": false,
   "physicsShapePoints": [],
   "eventList": [
-    {"isDnD":false,"eventNum":0,"eventType":0,"collisionObjectId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMEvent",},
     {"isDnD":false,"eventNum":0,"eventType":3,"collisionObjectId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMEvent",},
-    {"isDnD":false,"eventNum":4,"eventType":6,"collisionObjectId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMEvent",},
+    {"isDnD":false,"eventNum":0,"eventType":0,"collisionObjectId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMEvent",},
   ],
   "properties": [],
   "overriddenProperties": [],
   "parent": {
-    "name": "02_Main",
-    "path": "folders/Objects/02_Main.yy",
+    "name": "01_Title",
+    "path": "folders/Objects/01_Title.yy",
   },
   "resourceVersion": "1.0",
-  "name": "obj_hud_slider",
+  "name": "obj_button_marker",
   "tags": [],
   "resourceType": "GMObject",
 }
