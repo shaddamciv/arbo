@@ -16,7 +16,6 @@ contract Grow is UsingTellor {
 
     address public owner;
 
-    event Reseeded(address seeder, uint amountWatered, uint totalGrowth);
     uint256 maticPrice;
     bytes32 public maticQueryId = 0x40aa71e5205fdc7bdb7d65f7ae41daca3820c5d3a8f62357a99eda3aa27244a3;
 
@@ -30,14 +29,7 @@ contract Grow is UsingTellor {
         owner = msg.sender;
     }
 
-    function waterArbo() public payable {
-        require(msg.value >= wateringFee);
-        require(block.timestamp >= seedTime, "Dont over water!");
-        seedTime = block.timestamp;
-        totalWatered += msg.value;
 
-        emit Reseeded(msg.sender, totalWatered, 0);
-    }
 
     function setMaticPrice() external {
         // TIP: For best practices, use getDataBefore with a time buffer to allow time for a value to be disputed

@@ -146,7 +146,7 @@ contract RedirectAll is SuperAppBase {
 
         sender = decompiledContext.msgSender;
         console.log("The sender of the flow is - %s", sender);
-        return _updateOutflow(_ctx);
+        return _updateTreeStatus(_ctx);
     }
 
     function afterAgreementUpdated(
@@ -168,7 +168,7 @@ contract RedirectAll is SuperAppBase {
 
         sender = decompiledContext.msgSender;
         console.log("The updated sender of the flow is - %s", sender);
-        return _updateOutflow(_ctx);
+        return _updateTreeStatus(_ctx);
     }
 
     function afterAgreementTerminated(
@@ -184,7 +184,7 @@ contract RedirectAll is SuperAppBase {
             return _ctx;
         }
 
-        return _updateOutflow(_ctx);
+        return _updateTreeStatus(_ctx);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -216,12 +216,12 @@ contract RedirectAll is SuperAppBase {
         emit ReceiverChanged(newReceiver);
     }
 
-    /// @dev Updates the outflow. The flow is either created, updated, or deleted, depending on the
-    /// net flow rate.
+    /// @dev Updates the tree growth status. The flow is either created, updated, or deleted, 
+    /// depending on the net flow rate.
     /// @param ctx The context byte array from the Host's calldata.
     /// @return newCtx The new context byte array to be returned to the Host.
     /// TODO: How to stop the flow on a condition
-    function _updateOutflow(bytes calldata ctx) private returns (bytes memory newCtx) {
+    function _updateTreeStatus(bytes calldata ctx) private returns (bytes memory newCtx) {
         newCtx = ctx;
 
         int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
@@ -231,15 +231,18 @@ contract RedirectAll is SuperAppBase {
 
         int96 inFlowRate = netFlowRate + outFlowRate;
 
-        if (inFlowRate == 0) {
-            // The flow does exist and should be deleted.
-            newCtx = cfaV1Lib.deleteFlowWithCtx(ctx, address(this), _receiver, _acceptedToken);
-        } else if (outFlowRate != 0) {
-            // The flow does exist and needs to be updated.
-            newCtx = cfaV1Lib.updateFlowWithCtx(ctx, _receiver, _acceptedToken, inFlowRate);
-        } else {
-            // The flow does not exist but should be created.
-            newCtx = cfaV1Lib.createFlowWithCtx(ctx, _receiver, _acceptedToken, inFlowRate);
-        }
+
+        //in arbo 
+
+        // if (inFlowRate == 0) {
+        //     // The flow does exist and should be deleted.
+        //     newCtx = cfaV1Lib.deleteFlowWithCtx(ctx, address(this), _receiver, _acceptedToken);
+        // } else if (outFlowRate != 0) {
+        //     // The flow does exist and needs to be updated.
+        //     newCtx = cfaV1Lib.updateFlowWithCtx(ctx, _receiver, _acceptedToken, inFlowRate);
+        // } else {
+        //     // The flow does not exist but should be created.
+        //     newCtx = cfaV1Lib.createFlowWithCtx(ctx, _receiver, _acceptedToken, inFlowRate);
+        // }
     }
 }
