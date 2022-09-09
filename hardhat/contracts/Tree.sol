@@ -6,49 +6,54 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-
 /// @title Tree NFT, derived from tradeable cashflow as a starter
 /// @notice Inherits the ERC721 NFT interface from Open Zeppelin and the RedirectAll logic to
 /// redirect all incoming streams to the current NFT holder.
 /// Before each tree is grown fully, the NFT belongs to a factory contract
-/// Once the tree has grown, the ownership can be transferred to the account 
+/// Once the tree has grown, the ownership can be transferred to the account
 /// that had the largest flow rate when the tree was fully grown
 contract Tree is ERC721, Ownable, RedirectAll {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
 
-    event Watered(address seeder, uint amountWatered, uint totalGrowth);
+    event Watered(address seeder, uint256 amountWatered, uint256 totalGrowth);
 
-    struct TreeMeta{
-        uint8 currentGrowth; //no need to grow more than 256
+    struct TreeMeta {
+        uint256 currentGrowth; //no need to grow more than 256
         uint8 maxGrowth; // the max that this tree can grow to
         address ownerOfTree;
     }
+
+    mapping(uint => TreeMeta) public trees;
 
     constructor(
         string memory _name,
         string memory _symbol,
         ISuperfluid host,
         ISuperToken acceptedToken
-    ) ERC721(_name, _symbol) RedirectAll(host, acceptedToken) {
-        _mint(address(this), _tokenIdCounter.current());//Mint the first tree to self
-        emit Watered(address(this), 0, 0);
+    ) ERC721(_name, _symbol) RedirectAll(host, acceptedToken) { 
+        plantATree(); 
     }
 
-    function plantATree() onlyOwner external {
+    function plantATree() public onlyOwner {
+        require(ERC721(address(this)).balanceOf(address(this)) == 0,"A tree still needs to grow");
         uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment(); 
+        _tokenIdCounter.increment();
         _mint(address(this), tokenId);
+        emit Watered(address(this), 0, 0);
+        initTree(tokenId, 0,address(this));
     }
 
-    function waterArbo() public payable {
-        require(msg.value >= wateringFee);
-        require(block.timestamp >= seedTime, "Dont over water!");
-        seedTime = block.timestamp;
-        totalWatered += msg.value;
-
-        emit Reseeded(msg.sender, totalWatered, 0);
+    function initTree(uint tokenId, uint8 maxGrowth, address gardener) private {
+        trees[tokenId].currentGrowth = 0;
+        trees[tokenId].maxGrowth = maxGrowth;
+        trees[tokenId].ownerOfTree = gardener;
+    }
+    
+    function waterTree(int flowRate) internal {
+        uint256 tokenId = _tokenIdCounter.current();
+        trees[tokenId].currentGrowth = trees[tokenId].currentGrowth + uint(flowRate);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -62,9 +67,14 @@ contract Tree is ERC721, Ownable, RedirectAll {
         address to,
         uint256 // tokenId
     ) internal override {
-        // add code here to collect fees from the 
+        // add code here to collect fees from the
         _changeReceiver(to);
     }
 
-
+    function _updateTreeStatus(int96 inFlowRate)
+        internal
+        override
+    {
+        waterTree(inFlowRate);
+    }
 }

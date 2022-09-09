@@ -23,9 +23,6 @@ contract Grow is UsingTellor {
     constructor(
         address payable _tellor
         ) UsingTellor(_tellor)  {
-        //initial Seed of the plant
-        seedTime = block.timestamp;
-        emit Reseeded(msg.sender, 0, 0);
         owner = msg.sender;
     }
 

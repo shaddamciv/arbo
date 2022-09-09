@@ -75,7 +75,6 @@ before(async function () {
     let App = await ethers.getContractFactory("Tree", accounts[0])
 
     Tree = await App.deploy(
-        accounts[1].address,
         "Tree",
         "TCF",
         sf.settings.config.hostAddress,

@@ -46,19 +46,17 @@ contract RedirectAll is SuperAppBase {
 
     /// @notice This is the current receiver that all streams will be redirected to.
     address public _receiver;
-    bytes32 constant public CFA_ID = keccak256("org.superfluid-finance.agreements.ConstantFlowAgreement.v1");
 
     constructor(
         ISuperfluid host,
-        ISuperToken acceptedToken,
-        address receiver
+        ISuperToken acceptedToken
     ) {
         assert(address(host) != address(0));
         assert(address(acceptedToken) != address(0));
-        assert(receiver != address(0));
+        // assert(receiver != address(0));
 
         _acceptedToken = acceptedToken;
-        _receiver = receiver;
+        _receiver = address(this);
 
         cfaV1Lib = CFAv1Library.InitData({
             host: host,
@@ -146,7 +144,9 @@ contract RedirectAll is SuperAppBase {
 
         sender = decompiledContext.msgSender;
         console.log("The sender of the flow is - %s", sender);
-        return _updateTreeStatus(_ctx);
+        int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
+        _updateTreeStatus(netFlowRate);
+        return _ctx;
     }
 
     function afterAgreementUpdated(
@@ -168,7 +168,9 @@ contract RedirectAll is SuperAppBase {
 
         sender = decompiledContext.msgSender;
         console.log("The updated sender of the flow is - %s", sender);
-        return _updateTreeStatus(_ctx);
+        int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
+        _updateTreeStatus(netFlowRate);
+        return _ctx;
     }
 
     function afterAgreementTerminated(
@@ -183,8 +185,9 @@ contract RedirectAll is SuperAppBase {
         if (_superToken != _acceptedToken || _agreementClass != address(cfaV1Lib.cfa)) {
             return _ctx;
         }
-
-        return _updateTreeStatus(_ctx);
+        int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
+        _updateTreeStatus(netFlowRate);
+        return _ctx;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -218,19 +221,8 @@ contract RedirectAll is SuperAppBase {
 
     /// @dev Updates the tree growth status. The flow is either created, updated, or deleted, 
     /// depending on the net flow rate.
-    /// @param ctx The context byte array from the Host's calldata.
-    /// @return newCtx The new context byte array to be returned to the Host.
     /// TODO: How to stop the flow on a condition
-    function _updateTreeStatus(bytes calldata ctx) private returns (bytes memory newCtx) {
-        newCtx = ctx;
-
-        int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
-        //here store the flow rate per msg sender and keep accumulating and reducing
-
-        (, int96 outFlowRate, , ) = cfaV1Lib.cfa.getFlow(_acceptedToken, address(this), _receiver);
-
-        int96 inFlowRate = netFlowRate + outFlowRate;
-
+    function _updateTreeStatus(int96 inFlowRate) internal virtual{
 
         //in arbo 
 
