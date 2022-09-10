@@ -1,1 +1,0 @@
-buttonSelected = obj_button;
