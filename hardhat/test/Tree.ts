@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 
-import { Framework } from "@superfluid-finance/sdk-core"
+import { BigNumber, Framework } from "@superfluid-finance/sdk-core"
 
 import { assert } from "chai";
 import { ethers, web3 } from "hardhat";
@@ -27,6 +27,12 @@ let Tree
 
 const errorHandler = err => {
     if (err) throw err
+}
+
+interface TreeMeta {
+    currentGrowth:BigNumber; //no need to grow more than 256
+    maxGrowth:BigNumber; // the max that this tree can grow to
+    ownerOfTree:string;
 }
 
 before(async function () {
@@ -75,9 +81,8 @@ before(async function () {
     let App = await ethers.getContractFactory("Tree", accounts[0])
 
     Tree = await App.deploy(
-        accounts[1].address,
-        "Tree",
-        "TCF",
+        "Grow ARBO",
+        "ARBO",
         sf.settings.config.hostAddress,
         daix.address
     )
@@ -105,14 +110,11 @@ beforeEach(async function () {
     console.log("daix bal for acct 0: ", daiBal)
 })
 
-describe("sending flows", async function () {
-    it("Case #1 - Alice sends a flow", async () => {
+describe("watering plants", async function () {
+    it("Case #1 - Alice waters arbo", async () => {
         console.log("Tree address - ",Tree.address, "Alice's Address is - ", accounts[0].address)
 
-        const appInitialBalance = await daix.balanceOf({
-            account: Tree.address,
-            providerOrSigner: accounts[0]
-        })
+        const initialTreeData = await Tree.getTreeInfo(ethers.BigNumber.from("0"))
 
         const createFlowOperation = sf.cfaV1.createFlow({
             receiver: Tree.address,
@@ -120,43 +122,51 @@ describe("sending flows", async function () {
             flowRate: "100000000"
         })
 
+
         const txn = await createFlowOperation.exec(accounts[0])
+        console.log(initialTreeData[0], ethers.BigNumber.from("0"))
 
         await txn.wait()
 
-        const appFlowRate = await sf.cfaV1.getNetFlow({
-            superToken: daix.address,
-            account: Tree.address,
-            providerOrSigner: superSigner
-        })
-
-        const ownerFlowRate = await sf.cfaV1.getNetFlow({
-            superToken: daix.address,
-            account: accounts[1].address,
-            providerOrSigner: superSigner
-        })
-
-        const appFinalBalance = await daix.balanceOf({
-            account: Tree.address,
-            providerOrSigner: superSigner
-        })
+        const afterFlowTreeData = await Tree.getTreeInfo(ethers.BigNumber.from("0"))
 
         assert.equal(
-            ownerFlowRate,
-            "100000000",
-            "owner not receiving 100% of flowRate"
+            initialTreeData[0].toString(),
+            "0",
+            "it did not start as a seed"
         )
 
-        assert.equal(appFlowRate, 0, "App flowRate not zero")
-
-        assert.equal(
-            appInitialBalance.toString(),
-            appFinalBalance.toString(),
-            "balances aren't equal"
-        )
+        assert.equal(afterFlowTreeData[0].toString(), "100000000", "Tree has grown by a correct amount")
     })
+    it("Case #2 - Alice can win the arbo", async () => {
+        console.log("Tree address - ",Tree.address, "Alice's Address is - ", accounts[0].address)
 
-    it("Case #2 - Alice upates flows to the contract", async () => {
+        const initialTreeData = await Tree.getTreeInfo(ethers.BigNumber.from("0"))
+
+        const createFlowOperation = sf.cfaV1.createFlow({
+            receiver: Tree.address,
+            superToken: daix.address,
+            flowRate: "100000000"
+        })
+
+
+        const txn = await createFlowOperation.exec(accounts[0])
+        console.log(initialTreeData[0], ethers.BigNumber.from("0"))
+
+        await txn.wait()
+
+        const afterFlowTreeData = await Tree.getTreeInfo(ethers.BigNumber.from("0"))
+
+        assert.equal(
+            initialTreeData[0].toString(),
+            "0",
+            "it did not start as a seed"
+        )
+
+        assert.equal(afterFlowTreeData[0].toString(), "100000000", "Tree has grown by a correct amount")
+    })
+    xit("Case #2 - From seed", async () => {
+        
         const appInitialBalance = await daix.balanceOf({
             account: Tree.address,
             providerOrSigner: accounts[0]
@@ -221,7 +231,7 @@ describe("sending flows", async function () {
         )
     })
 
-    it("Case 3: multiple users send flows into contract", async () => {
+    xit("Case 3: multiple users send flows into contract", async () => {
         const appInitialBalance = await daix.balanceOf({
             account: Tree.address,
             providerOrSigner: accounts[0]
