@@ -223,6 +223,7 @@ contract RedirectAll is SuperAppBase {
     /// depending on the net flow rate.
     /// TODO: How to stop the flow on a condition
     function _updateTreeStatus(int96 inFlowRate) internal virtual{
+        console.log("------------Watering the parent plant-----------");
 
         //in arbo 
 

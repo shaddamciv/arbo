@@ -7,6 +7,8 @@ import {ERC721Holder} from "@openzeppelin/contracts/token/ERC721/utils/ERC721Hol
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
+import "hardhat/console.sol";
+
 /// @title Tree NFT, derived from tradeable cashflow as a starter
 /// @notice Inherits the ERC721 NFT interface from Open Zeppelin and the RedirectAll logic to
 /// redirect all incoming streams to the current NFT holder.
@@ -53,8 +55,10 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
     }
     
     function waterTree(int flowRate) internal {
-        uint256 tokenId = _tokenIdCounter.current();
-        trees[tokenId].currentGrowth = trees[tokenId].currentGrowth + uint(flowRate);
+        uint256 tokenId = _tokenIdCounter.current()-1;
+        TreeMeta storage myTree = trees[tokenId];
+        myTree.currentGrowth = trees[tokenId].currentGrowth + uint(flowRate);
+        console.log("------------Watering the plant-------%s----%d------ %d",msg.sender, tokenId, myTree.currentGrowth);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -80,7 +84,7 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         waterTree(inFlowRate);
     }
     
-    function getTreeInfo(uint tokenId) public returns(TreeMeta memory treeInfo) {
+    function getTreeInfo(uint tokenId) public view returns(TreeMeta memory treeInfo) {
         TreeMeta memory myTree = trees[tokenId];
         return myTree;
     }
