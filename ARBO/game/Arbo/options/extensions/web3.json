@@ -1,9 +1,0 @@
-{
-  "extensionId": {
-    "name": "web3",
-    "path": "extensions/web3/web3.yy"
-  },
-  "resourceVersion": "1.0",
-  "resourceType": "GMExtensionConfigSet",
-  "configurables": null
-}
