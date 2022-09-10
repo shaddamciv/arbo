@@ -20,12 +20,14 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
 
     Counters.Counter private _tokenIdCounter;
 
-    event Watered(address seeder, uint256 tokenId, uint256 amountWatered, uint256 totalGrowth);
+    event Watered(address gardener, uint256 tokenId, uint256 amountWatered, uint256 totalGrowth);
+    event Winner(address gardener, uint256 tokenId);
 
     struct TreeMeta {
-        uint256 currentGrowth; //no need to grow more than 256
+        uint8 currentGrowth; //no need to grow more than 256
         uint8 maxGrowth; // the max that this tree can grow to
-        address ownerOfTree;
+        uint8 growthMultiplier;// a random multiplier based on price of native token
+        uint8 isWon;
     }
 
     mapping(uint => TreeMeta) public trees;
@@ -51,14 +53,25 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
     function initTree(uint tokenId, uint8 maxGrowth, address gardener) private {
         trees[tokenId].currentGrowth = 0;
         trees[tokenId].maxGrowth = maxGrowth;
-        trees[tokenId].ownerOfTree = gardener;
     }
     
-    function waterTree(int flowRate) internal {
+    function waterTree(int96 flowRate, address gardener) internal {
         uint256 tokenId = _tokenIdCounter.current()-1;
         TreeMeta storage myTree = trees[tokenId];
-        myTree.currentGrowth = trees[tokenId].currentGrowth + uint(flowRate);
-        console.log("------------Watering the plant-------%s----%d------ %d",msg.sender, tokenId, myTree.currentGrowth);
+
+        require(myTree.isWon == 0, "This ARBO is already grown!");
+
+        uint8 amountWatered = flowCap(flowRate) * getMultiplierCapped();
+        myTree.currentGrowth = trees[tokenId].currentGrowth + amountWatered;
+
+        if(myTree.currentGrowth >= myTree.maxGrowth) {
+            //this player has watered the tree above the required height
+            approve(gardener, _tokenIdCounter.current()-1);
+            myTree.isWon = 1;
+            emit Winner(gardener, _tokenIdCounter.current()-1);
+        }
+
+        emit Watered(address(this), tokenId, amountWatered, myTree.currentGrowth);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -77,15 +90,38 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
             _changeReceiver(to);
     }
 
-    function _updateTreeStatus(int96 inFlowRate)
+    function _updateTreeStatus(int96 inFlowRate, address gardener)
         internal
         override
     {
-        waterTree(inFlowRate);
+        waterTree(inFlowRate, gardener);
     }
     
     function getTreeInfo(uint tokenId) public view returns(TreeMeta memory treeInfo) {
         TreeMeta memory myTree = trees[tokenId];
         return myTree;
+    }
+
+    //100 MATIC = 100 $
+    //1 Matic - Small sprite - we will pay him a fee when the winner withdraws
+    //list of small sprites will be in a  pool
+    function flowCap(int96 a) public pure returns (uint8) {
+        uint8 growBy = 0;
+        if( a > 100) {  
+            growBy = 1;
+        } else if( a > 100 && a <= 1000 ){
+            growBy = 2;
+        } else if( a > 1000 && a <= 10000 ){
+            growBy = 3;
+        } else if( a > 10000 && a <= 100000 ){
+            growBy = 5;
+        } else if( a > 1000000 && a <= 1000000 ){
+            growBy = 8;
+        }
+        return growBy;
+    }
+
+    function getMultiplierCap() public pure returns(uint8) {
+       return uint8(block.number - (block.number%10));
     }
 }

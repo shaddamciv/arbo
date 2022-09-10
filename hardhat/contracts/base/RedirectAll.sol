@@ -145,7 +145,7 @@ contract RedirectAll is SuperAppBase {
         sender = decompiledContext.msgSender;
         console.log("The sender of the flow is - %s", sender);
         int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
-        _updateTreeStatus(netFlowRate);
+        _updateTreeStatus(netFlowRate, sender);
         return _ctx;
     }
 
@@ -169,7 +169,7 @@ contract RedirectAll is SuperAppBase {
         sender = decompiledContext.msgSender;
         console.log("The updated sender of the flow is - %s", sender);
         int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
-        _updateTreeStatus(netFlowRate);
+        _updateTreeStatus(netFlowRate, sender);
         return _ctx;
     }
 
@@ -185,8 +185,13 @@ contract RedirectAll is SuperAppBase {
         if (_superToken != _acceptedToken || _agreementClass != address(cfaV1Lib.cfa)) {
             return _ctx;
         }
-        int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
-        _updateTreeStatus(netFlowRate);
+        //TODO:here the user has stopped watering so we need to remove him from the list of waterers
+        // We also need to stop watering for all the non winner
+        // uData = decompiledContext;
+
+        // sender = decompiledContext.msgSender;
+        // int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
+        // _updateTreeStatus(netFlowRate);
         return _ctx;
     }
 
@@ -221,8 +226,9 @@ contract RedirectAll is SuperAppBase {
 
     /// @dev Updates the tree growth status. The flow is either created, updated, or deleted, 
     /// depending on the net flow rate.
+    /// each time we can iterate through all the gardeners and let them water again, starting with the latest
     /// TODO: How to stop the flow on a condition
-    function _updateTreeStatus(int96 inFlowRate) internal virtual{
+    function _updateTreeStatus(int96 inFlowRate, address sender) internal virtual{
         console.log("------------Watering the parent plant-----------");
 
         //in arbo 

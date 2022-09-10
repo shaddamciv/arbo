@@ -29,11 +29,6 @@ const errorHandler = err => {
     if (err) throw err
 }
 
-interface TreeMeta {
-    currentGrowth:BigNumber; //no need to grow more than 256
-    maxGrowth:BigNumber; // the max that this tree can grow to
-    ownerOfTree:string;
-}
 
 before(async function () {
     //get accounts from hardhat
