@@ -21,16 +21,18 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
     Counters.Counter private _tokenIdCounter;
 
     event Watered(address gardener, uint256 tokenId, uint256 amountWatered, uint256 totalGrowth);
-    event Winner(address gardener, uint256 tokenId);
+    event Winner(address gardener, uint256 tokenId, uint amountWon);
+    event WithdrawWinnings(uint tokenId, uint amountWon);
 
     struct TreeMeta {
         uint8 currentGrowth; //no need to grow more than 256
         uint8 maxGrowth; // the max that this tree can grow to
-        uint8 growthMultiplier;// a random multiplier based on price of native token
         uint8 isWon;
+        uint256 amountWon;// a random multiplier based on price of native token
     }
 
     mapping(uint => TreeMeta) public trees;
+    uint prevBalance;
 
     constructor(
         string memory _name,
@@ -38,16 +40,25 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         ISuperfluid host,
         ISuperToken acceptedToken
     ) ERC721(_name, _symbol) RedirectAll(host, acceptedToken) { 
-        plantATree(); 
+        plantATree(5); 
     }
 
-    function plantATree() public onlyOwner {
+    function plantATree(uint8 maxGrowth) public onlyOwner {
         require(balanceOf(address(this)) == 0,"A tree still needs to grow");
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _mint(address(this), tokenId);
         emit Watered(address(this), tokenId, 0, 0);
-        initTree(tokenId, 0,address(this));
+        initTree(tokenId, maxGrowth ,address(this));
+    }
+
+    function withdrawFunds(uint tokenId) external {
+        require(ownerOf(tokenId) == msg.sender, "Not ARBO gardener!"); // make sure that its the winner
+        TreeMeta storage myTree = trees[tokenId];
+        // (bool success, bytes memory result) = address(_acceptedToken).delegatecall(abi.encodeWithSignature("transfer(address,uint256)", msg.sender, myTree.amountWon));
+        // require(success, "Unable to transfer");
+        ISuperToken(_acceptedToken).transfer(msg.sender, myTree.amountWon);
+        emit WithdrawWinnings(tokenId, myTree.amountWon); 
     }
 
     function initTree(uint tokenId, uint8 maxGrowth, address gardener) private {
@@ -66,9 +77,12 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
 
         if(myTree.currentGrowth >= myTree.maxGrowth) {
             //this player has watered the tree above the required height
-            approve(gardener, _tokenIdCounter.current()-1);
+            _approve(gardener, _tokenIdCounter.current()-1);
             myTree.isWon = 1;
-            emit Winner(gardener, _tokenIdCounter.current()-1);
+            uint currBalance = ISuperToken(_acceptedToken).balanceOf(address(this));
+            myTree.amountWon = currBalance - prevBalance;
+            prevBalance = currBalance;
+            emit Winner(gardener, _tokenIdCounter.current()-1, myTree.amountWon);
         }
 
         emit Watered(address(this), tokenId, amountWatered, myTree.currentGrowth);
@@ -86,8 +100,9 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         uint256 // tokenId
     ) internal override {
         // transfer the flow to the new owner
-        if(to != address(this))
-            _changeReceiver(to);
+        // if(to != address(this))
+        // here we need to add a function to collect some fees for toucan and the small gardeners
+            // _changeReceiver(to);
     }
 
     function _updateTreeStatus(int96 inFlowRate, address gardener)
@@ -105,23 +120,22 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
     //100 MATIC = 100 $
     //1 Matic - Small sprite - we will pay him a fee when the winner withdraws
     //list of small sprites will be in a  pool
+    // if the same user tries to increase flow it has to be 10 times else revert
     function flowCap(int96 a) public pure returns (uint8) {
-        uint8 growBy = 0;
-        if( a > 100) {  
-            growBy = 1;
-        } else if( a > 100 && a <= 1000 ){
+        uint8 growBy = 1;
+        if( a > 100 && a <= 1000 ){
             growBy = 2;
-        } else if( a > 1000 && a <= 10000 ){
-            growBy = 3;
         } else if( a > 10000 && a <= 100000 ){
+            growBy = 3;
+        } else if( a > 1000000 && a <= 10000000 ){
             growBy = 5;
-        } else if( a > 1000000 && a <= 1000000 ){
-            growBy = 8;
+        } else if( a > 10000000 && a <= 100000000 ){
+            growBy = 10;
         }
         return growBy;
     }
 
-    function getMultiplierCap() public pure returns(uint8) {
-       return uint8(block.number - (block.number%10));
+    function getMultiplierCapped() public view returns(uint8) {
+       return uint8(block.number%10);
     }
 }

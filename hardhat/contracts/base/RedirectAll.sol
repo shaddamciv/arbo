@@ -9,8 +9,6 @@ import {IConstantFlowAgreementV1} from "@superfluid-finance/ethereum-contracts/c
 
 import {SuperAppBase} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperAppBase.sol";
 
-import "hardhat/console.sol";
-
 /// @dev Constant Flow Agreement registration key, used to get the address from the host.
 bytes32 constant CFA_ID = keccak256("org.superfluid-finance.agreements.ConstantFlowAgreement.v1");
 
@@ -95,33 +93,7 @@ contract RedirectAll is SuperAppBase {
         _;
     }
 
-    // ---------------------------------------------------------------------------------------------
-    // RECEIVER DATA
-
-    /// @notice Returns current receiver's address, start time, and flow rate.
-    /// @return startTime Start time of the current flow.
-    /// @return receiver Receiving address.
-    /// @return flowRate Flow rate from this contract to the receiver.
-    function currentReceiver()
-        external
-        view
-        returns (
-            uint256 startTime,
-            address receiver,
-            int96 flowRate
-        )
-    {
-        if (receiver != address(0)) {
-            (startTime, flowRate, , ) = cfaV1Lib.cfa.getFlow(
-                _acceptedToken,
-                address(this),
-                _receiver
-            );
-
-            receiver = _receiver;
-        }
-    }
-
+       
     // ---------------------------------------------------------------------------------------------
     // SUPER APP CALLBACKS
 
@@ -143,7 +115,7 @@ contract RedirectAll is SuperAppBase {
         uData = decompiledContext;
 
         sender = decompiledContext.msgSender;
-        console.log("The sender of the flow is - %s", sender);
+        
         int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
         _updateTreeStatus(netFlowRate, sender);
         return _ctx;
@@ -167,7 +139,7 @@ contract RedirectAll is SuperAppBase {
         uData = decompiledContext;
 
         sender = decompiledContext.msgSender;
-        console.log("The updated sender of the flow is - %s", sender);
+        
         int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
         _updateTreeStatus(netFlowRate, sender);
         return _ctx;
@@ -206,18 +178,14 @@ contract RedirectAll is SuperAppBase {
         if (cfaV1Lib.host.isApp(ISuperApp(newReceiver))) revert ReceiverIsSuperApp();
 
         if (newReceiver == _receiver) return;
-
-        (, int96 outFlowRate, , ) = cfaV1Lib.cfa.getFlow(_acceptedToken, address(this), _receiver);
-
-        if (outFlowRate > 0) {
-            cfaV1Lib.deleteFlow(address(this), _receiver, _acceptedToken);
+        
 
             cfaV1Lib.createFlow(
                 newReceiver,
                 _acceptedToken,
                 cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this))
             );
-        }
+        // }
 
         _receiver = newReceiver;
 
@@ -229,19 +197,5 @@ contract RedirectAll is SuperAppBase {
     /// each time we can iterate through all the gardeners and let them water again, starting with the latest
     /// TODO: How to stop the flow on a condition
     function _updateTreeStatus(int96 inFlowRate, address sender) internal virtual{
-        console.log("------------Watering the parent plant-----------");
-
-        //in arbo 
-
-        // if (inFlowRate == 0) {
-        //     // The flow does exist and should be deleted.
-        //     newCtx = cfaV1Lib.deleteFlowWithCtx(ctx, address(this), _receiver, _acceptedToken);
-        // } else if (outFlowRate != 0) {
-        //     // The flow does exist and needs to be updated.
-        //     newCtx = cfaV1Lib.updateFlowWithCtx(ctx, _receiver, _acceptedToken, inFlowRate);
-        // } else {
-        //     // The flow does not exist but should be created.
-        //     newCtx = cfaV1Lib.createFlowWithCtx(ctx, _receiver, _acceptedToken, inFlowRate);
-        // }
     }
 }
