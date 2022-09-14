@@ -16,7 +16,7 @@ contract Grow is UsingTellor {
 
     address public owner;
 
-    uint256 maticPrice;
+    uint256 nativeTokenPrice;
     bytes32 public maticQueryId = 0x40aa71e5205fdc7bdb7d65f7ae41daca3820c5d3a8f62357a99eda3aa27244a3;
 
 
@@ -28,13 +28,14 @@ contract Grow is UsingTellor {
 
 
 
-    function setMaticPrice() external {
+    function getNativeTokenPrice() external returns(uint256 nativeTokenPrice) {
         // TIP: For best practices, use getDataBefore with a time buffer to allow time for a value to be disputed
         (bool _ifRetrieve, bytes memory _value, uint256 _timestampRetrieved) = getDataBefore(maticQueryId, block.timestamp - 10 minutes);
         require(_ifRetrieve, "Not able to retrieve price!"); 
         
-        maticPrice = abi.decode(_value,(uint256));
-        console.log("matic Price  - %d ", maticPrice);
+        nativeTokenPrice = abi.decode(_value,(uint256));
+        console.log("matic Price  - %d ", nativeTokenPrice);
+        return nativeTokenPrice;
     
     }
 

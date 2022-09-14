@@ -4,6 +4,12 @@ ARBO a game in which you get back digitally for nurturing the environment. All p
   <img src="./assets/imgs/arbo.gif"/>
 </p>
 
+## Design of the game
+
+<p align="center">
+  <img src="./assets/imgs/Arbo_flow_en.png"/>
+</p>
+
 ## Folder structure
 1. hardhat -> Smart contract code
 2. ARBO -> The Gamemaker game
