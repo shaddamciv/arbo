@@ -133,7 +133,7 @@ describe("watering plants", async function () {
 
         assert.closeTo(parseInt(afterFlowTreeData[0].toString()), 5, 5, "Tree has not grown by a correct amount")
     })
-    it("Case #2 - Alice can win the arbo", async () => {
+    xit("Case #2 - Alice can win the arbo", async () => {
         console.log("Tree address - ",Tree.address, "Alice's Address is - ", accounts[0].address)
 
         const initialTreeData = await Tree.getTreeInfo(ethers.BigNumber.from("0"))
@@ -163,7 +163,7 @@ describe("watering plants", async function () {
         await stopFlowOperation2Txn.wait()
         assert.equal(afterFlowTreeData[2].toString(), "1", "Tree was not won")
     })
-    it("Case #3 - Alice can win and withdraw", async () => {
+    xit("Case #3 - Alice can win and withdraw", async () => {
         const account0BalanceInit = await daix.balanceOf({
             account: accounts[0].address,
             providerOrSigner: accounts[0]

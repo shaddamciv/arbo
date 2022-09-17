@@ -1,0 +1,29 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Tree
+    network: mumbai
+    source:
+      address: "0xF25eD075A54f2286d6C14372f92b3399ce280fBF"
+      abi: Tree
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Watered
+        - Winner
+        - WithdrawWinnings
+      abis:
+        - name: Tree
+          file: ./abis/Tree.json
+      eventHandlers:
+        - event: Watered(address,uint256,uint256,uint256)
+          handler: handleWatered
+        - event: Winner(address,uint256,uint256)
+          handler: handleWinner
+        - event: WithdrawWinnings(uint256,uint256)
+          handler: handleWithdrawWinnings
+      file: ./src/mapping.ts

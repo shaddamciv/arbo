@@ -1,0 +1,15 @@
+type ARBO @entity {
+  id: ID!
+  count: BigInt!
+  owner: Bytes! # address
+  gardeners: [Gardeners!]! # gardeners
+  totalGrowth: BigInt!
+  currentGrowth: BigInt!
+  winner: Bytes!
+}
+
+type Gardeners @entity {
+  id: ID!
+  address: Bytes! # address
+  amount: BigInt! # Amount of water
+}

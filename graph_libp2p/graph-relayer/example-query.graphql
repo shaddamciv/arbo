@@ -1,0 +1,6 @@
+query ExampleQuery @live {
+  arbos(first: 2) {
+    id
+    owner
+  }
+}

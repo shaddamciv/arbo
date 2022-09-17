@@ -1,0 +1,12 @@
+sources:
+  - name: ARBO
+    handler:
+      graphql:
+        endpoint: https://api.thegraph.com/subgraphs/name/shaddamciv/arbo
+
+plugins:
+  - pollingLive:
+      defaultInterval: 1000
+
+documents:
+  - ./example-query.graphql

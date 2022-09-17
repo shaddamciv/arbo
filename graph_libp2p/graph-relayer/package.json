@@ -1,0 +1,23 @@
+{
+  "name": "javascript-cjs-example",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "start": "node index.js",
+    "build-client": "graphclient build --fileType json",
+    "graphiql": "graphclient serve-dev",
+    "check": "exit 0"
+  },
+  "dependencies": {
+    "@chainsafe/libp2p-noise": "^8.0.1",
+    "@graphprotocol/client-cli": "2.2.9",
+    "@libp2p/floodsub": "^3.0.7",
+    "@libp2p/mplex": "^5.2.2",
+    "@libp2p/tcp": "^3.0.8",
+    "diff": "^5.1.0",
+    "graphql": "16.6.0",
+    "libp2p": "^0.39.1",
+    "ws": "^8.8.1"
+  },
+  "type": "module"
+}
