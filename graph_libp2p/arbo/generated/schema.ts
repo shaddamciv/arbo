@@ -19,7 +19,8 @@ export class ARBO extends Entity {
     this.set("count", Value.fromBigInt(BigInt.zero()));
     this.set("owner", Value.fromBytes(Bytes.empty()));
     this.set("gardeners", Value.fromStringArray(new Array(0)));
-    this.set("totalGrowth", Value.fromBigInt(BigInt.zero()));
+    this.set("maxGrowth", Value.fromI32(0));
+    this.set("currentGrowth", Value.fromBigInt(BigInt.zero()));
     this.set("winner", Value.fromBytes(Bytes.empty()));
   }
 
@@ -75,13 +76,22 @@ export class ARBO extends Entity {
     this.set("gardeners", Value.fromStringArray(value));
   }
 
-  get totalGrowth(): BigInt {
-    let value = this.get("totalGrowth");
+  get maxGrowth(): i32 {
+    let value = this.get("maxGrowth");
+    return value!.toI32();
+  }
+
+  set maxGrowth(value: i32) {
+    this.set("maxGrowth", Value.fromI32(value));
+  }
+
+  get currentGrowth(): BigInt {
+    let value = this.get("currentGrowth");
     return value!.toBigInt();
   }
 
-  set totalGrowth(value: BigInt) {
-    this.set("totalGrowth", Value.fromBigInt(value));
+  set currentGrowth(value: BigInt) {
+    this.set("currentGrowth", Value.fromBigInt(value));
   }
 
   get winner(): Bytes {

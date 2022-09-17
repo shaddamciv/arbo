@@ -20,7 +20,7 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
 
     Counters.Counter private _tokenIdCounter;
 
-    event Watered(address gardener, uint256 tokenId, uint256 amountWatered, uint256 totalGrowth);
+    event Watered(address gardener, uint256 tokenId, uint256 amountWatered, uint256 totalGrowth, uint8 maxGrowth);
     event Winner(address gardener, uint256 tokenId, uint amountWon);
     event WithdrawWinnings(uint tokenId, uint amountWon);
 
@@ -50,7 +50,7 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _mint(address(this), tokenId);
-        emit Watered(address(this), tokenId, 0, 0);
+        emit Watered(address(this), tokenId, 0, 0, maxGrowth);
         initTree(tokenId, maxGrowth ,address(this));
     }
 
@@ -76,7 +76,7 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         uint8 latestFlowCap = flowCap(flowRate);
         uint8 amountWatered = latestFlowCap * getMultiplierCapped();
         myTree.currentGrowth = trees[tokenId].currentGrowth + amountWatered;
-        emit Watered(gardener, tokenId, amountWatered, myTree.currentGrowth);
+        emit Watered(gardener, tokenId, amountWatered, myTree.currentGrowth, trees[tokenId].maxGrowth);
 
         if( latestFlowCap > lastFlowCap ) {
             //dilemma, remove existing winners and add new winner

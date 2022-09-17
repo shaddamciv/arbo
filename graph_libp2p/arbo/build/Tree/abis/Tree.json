@@ -173,6 +173,12 @@
         "internalType": "uint256",
         "name": "totalGrowth",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "maxGrowth",
+        "type": "uint8"
       }
     ],
     "name": "Watered",
@@ -1014,6 +1020,25 @@
       {
         "internalType": "contract ISuperfluidToken",
         "name": "appAllowanceToken",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "winners",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
         "type": "address"
       }
     ],

@@ -3,7 +3,7 @@ type ARBO @entity {
   count: BigInt!
   owner: Bytes! # address
   gardeners: [Gardeners!]! # gardeners
-  totalGrowth: BigInt!
+  maxGrowth: Int!
   currentGrowth: BigInt!
   winner: Bytes!
 }

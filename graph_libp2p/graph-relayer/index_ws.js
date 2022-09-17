@@ -12,7 +12,7 @@ async function main() {
           id
           count
           owner
-          totalGrowth
+          maxGrowth
           currentGrowth
           gardeners {
             id

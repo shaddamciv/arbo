@@ -29,7 +29,8 @@ export function handleWatered(event: Watered): void {
 
   // Entity fields can be set based on event parameters
   entity.owner = event.address
-  entity.totalGrowth = entity.totalGrowth.plus(event.params.amountWatered)
+  entity.currentGrowth =  event.params.totalGrowth
+  entity.maxGrowth = event.params.maxGrowth
 
   gardener.amount = gardener.amount.plus(event.params.amountWatered)
   gardener.address = event.params.gardener
