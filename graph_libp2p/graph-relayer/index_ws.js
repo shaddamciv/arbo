@@ -1,4 +1,4 @@
-import { execute } from './.graphclient/index.js'
+import { execute } from './graphclient/index.js'
 import WebSocket, { WebSocketServer } from 'ws';
 import * as Diff from 'diff';
 const wss = new WebSocketServer({ port: 8080 });
@@ -33,7 +33,7 @@ async function main() {
       i++
       const diff = Diff.diffJson(oldData, data)
 
-      if(diff && (diff[1]?.added || diff[1]?.removed)) {
+      if(diff && diff[1] && (diff[1].added || diff[1].removed)) {
         publish(data) //publish data if there is a change
         console.log(data)
         oldData = data
