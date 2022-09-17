@@ -1,7 +1,7 @@
 import { execute } from './graphclient/index.js'
 import WebSocket, { WebSocketServer } from 'ws';
 import * as Diff from 'diff';
-const wss = new WebSocketServer({ port: 8080 });
+
 let response
 let oldData={}
 async function main() {
@@ -33,11 +33,10 @@ async function main() {
       i++
       const diff = Diff.diffJson(oldData, data)
 
-      if(diff && diff[1] && (diff[1].added || diff[1].removed)) {
+      // if(diff && diff[1] && (diff[1].added || diff[1].removed)) {
         publish(data) //publish data if there is a change
-        console.log(data)
         oldData = data
-      }
+      // }
       
       if (i >= 1000000000000000000000) {
         console.log('ALL DONE!')
@@ -46,21 +45,39 @@ async function main() {
     }
   })()
 }
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+const wss = new WebSocketServer({ port: 8080 });
+
+const clients = new Map();
+
+wss.on('connection', (ws) => {
+  const id = uuidv4();
+  const color = Math.floor(Math.random() * 360);
+  const metadata = { id, color };
+
+  // ws.on('message', (messageAsString) => {
+  //   const message = JSON.parse(messageAsString);
+  //     const metadata = clients.get(ws);
+
+  //     message.sender = metadata.id;
+  //     message.color = metadata.color;
+  //   });
+  clients.set(ws, metadata);
+  ws.on("close", () => {
+    clients.delete(ws);
+  });
+});
 
 function publish(data){
-  wss.on('connection', function (ws) {
+  console.log('Published ', JSON.stringify(data));
 
-      ws.send(JSON.stringify(data), function () {
-        //
-        // Ignore errors.
-        //
-      })
-
-  
-    // ws.on('close', function () {
-      
-      
-    // });
+  [...clients.keys()].forEach((client) => {
+    client.send(JSON.stringify(data));
   });
 }
 
