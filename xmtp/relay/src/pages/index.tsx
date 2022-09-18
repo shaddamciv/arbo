@@ -7,12 +7,12 @@ import SignInLink from 'components/Connector';
 import Arbo from '@components/Arbo';
 import { useIsMetaMask } from 'hooks';
 import { useEffect, useCallback } from 'react';
-import MobileBetaStatus from 'components/MobileBetaStatus';
+// import MobileBetaStatus from 'components/MobileBetaStatus';
 import { useRedirect } from 'hooks';
 import { useRouter } from 'next/router';
-import Image from 'next/image';
+// import Image from 'next/image';
 import Link from 'next/link';
-import PanelLogo from '../../public/assets/images/PanelLogo.png';
+// import PanelLogo from '../../public/assets/images/PanelLogo.png';
 
 export default function Landing() {
   const router = useRouter();
@@ -128,47 +128,17 @@ const ModalParagraph = styled.p`
   color: #5b5b5b;
 `;
 
-const TopLeftTitle = styled.div`
-  font-size: 20px;
-  margin-left: 10px;
-  display: flex;
-  align-items: center;
-  color: black; ;
-`;
 
-const TopRightTextContent = styled.div`
-  border-radius: 99rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
-  color: #5b5b5b;
-  font-weight: 400;
-  border: 1px solid #fbfbfb;
-  filter: drop-shadow(0px 0px 4px rgba(0, 0, 0, 0.1));
+// const TopRightTextContent = styled.div`
+//   border-radius: 99rem;
+//   padding: 0.5rem 0.75rem;
+//   font-size: 0.75rem;
+//   color: #5b5b5b;
+//   font-weight: 400;
+//   border: 1px solid #fbfbfb;
+//   filter: drop-shadow(0px 0px 4px rgba(0, 0, 0, 0.1));
 
-  &:before {
-    content: '';
-    display: inline-block;
-    transform: translate(-50%, -50%);
-    margin-right: 4px;
-    height: 4px;
-    width: 4px;
-    border-radius: 50%;
-    background-color: #84ffa7;
-  }
-`;
 
-const TopLeftFlexRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const BottomRight = styled.div`
-  position: fixed;
-  bottom: 0;
-  right: 0;
-  margin: 1rem;
-`;
 const SideContentWidth = styled.div`
   max-width: 360px;
   width: 100%;
@@ -239,18 +209,6 @@ const MaybeHideOnMobileConnector = styled(Connector)<{ shouldHide: boolean }>`
   }
 `;
 
-const Header = styled.header`
-  width: 100%;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.1825rem 3rem;
-
-  @media (max-width: 400px) {
-    padding: 1.1825rem 1.5rem;
-  }
-`;
 
 const A = styled.a`
   text-decoration: none;

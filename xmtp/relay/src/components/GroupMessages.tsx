@@ -1,12 +1,12 @@
 import { useDeviceDetect } from 'hooks';
-import { FunctionComponent, useCallback, useRef, useState } from 'react';
+import { FunctionComponent, useCallback, useRef } from 'react';
 import styled from 'styled-components';
-import MobileMessagesHeader from './MobileMessagesHeader';
+// import MobileMessagesHeader from './MobileMessagesHeader';
 import MobileMessageInput from './MobileMessageInput';
 import { useRouter } from 'next/router';
 import MobileMessagesBucket from './MobileMessagesBucket';
 import MobileLoadingMessages from './MobileLoadingMessages';
-import MobileMenu from './MobileMenu';
+// import MobileMenu from './MobileMenu';
 import { Status, useXmtp } from 'xmtp-react/context';
 import MobileStatusCard from './MobileStatusCard';
 import { useGroupMessages, useGroups, useSendGroupMessage } from 'xmtp-react';
@@ -22,10 +22,10 @@ export const GroupMessages: FunctionComponent = () => {
   const group = groups[groupId];
   const messages = useGroupMessages(groupId);
   const sendGroupMessage = useSendGroupMessage();
-  const [showMenu, setShowMenu] = useState<boolean>(false);
+  // const [showMenu, setShowMenu] = useState<boolean>(false);
   const divScrollToRef = useRef<HTMLInputElement>(null);
-  const openMenu = useCallback(() => setShowMenu(true), [setShowMenu]);
-  const closeMenu = useCallback(() => setShowMenu(false), [setShowMenu]);
+  // const openMenu = useCallback(() => setShowMenu(true), [setShowMenu]);
+  // const closeMenu = useCallback(() => setShowMenu(false), [setShowMenu]);
 
   const doSendMessage = useCallback(
     async (message: string) => {

@@ -1,9 +1,9 @@
 import { useEffect } from "react"
-import styled from 'styled-components';
+// import styled from 'styled-components';
 
 const Arbo = () => {
   useEffect(() => {
-    Array.from(document.getElementsByTagName("iframe")).forEach((iframe:any) => {
+    // Array.from(document.getElementsByTagName("iframe")).forEach((iframe:any) => {
       // iframe.contentWindow.addEventListener(
       //   "load",
       //   () => {
@@ -22,7 +22,7 @@ const Arbo = () => {
       //   },
       //   true
       // );
-    });
+    // });
   }, []);
 
   return (

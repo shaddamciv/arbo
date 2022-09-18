@@ -2,33 +2,23 @@ import { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { useDeviceDetect } from 'hooks';
 import { Status, useXmtp } from 'xmtp-react/context';
-import MobileConversationsHeader from './MobileConversationsHeader';
-import MobileMenu from './MobileMenu';
+// import MobileConversationsHeader from './MobileConversationsHeader';
+// import MobileMenu from './MobileMenu';
 import MobileStatusCard from './MobileStatusCard';
 import MobileLoadingConversations from './MobileLoadingPage';
 import { useGroups, createGroup, Group } from 'xmtp-react';
 import GroupConversation from './GroupConversation';
 import { CreateGroupModal } from './CreateGroupModal';
 import { useRouter } from 'next/router';
-import Arbo from '@components/Arbo';
 
 export default function GroupConversations() {
   const { isMobile } = useDeviceDetect();
   const xmtp = useXmtp();
   const groups = useGroups();
   const router = useRouter();
-  const [showMenu, setShowMenu] = useState<boolean>(false);
+  // const [showMenu, setShowMenu] = useState<boolean>(false);
   const [showNewConversation, setShowNewConversation] =
     useState<boolean>(false);
-
-  const doOpenMenu = () => {
-    setShowMenu(true);
-  };
-
-  const doCloseMenu = () => {
-    setShowMenu(false);
-  };
-
   const doNewConversation = () => {
     setShowNewConversation(true);
   };
