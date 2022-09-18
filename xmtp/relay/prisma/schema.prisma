@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model InitEvent {
+  id           String   @id @default(uuid())
+  time         DateTime @default(now())
+  address_hash String   @db.VarChar()
+
+  @@map("init_events")
+}
+
+model PeerNotInitializedEvent {
+  id           String   @id @default(uuid())
+  time         DateTime @default(now())
+  peer_address String   @db.VarChar()
+
+  @@map("peer_not_initialized_events")
+}
+
+model MessageEvent {
+  id_hash           String   @id @db.VarChar()
+  time              DateTime @default(now())
+  from_address_hash String   @db.VarChar()
+  to_address_hash   String   @db.VarChar()
+
+  @@map("message_events")
+}
+
+model SendMessageEvent {
+  id                String   @id @default(uuid())
+  time              DateTime @default(now())
+  from_address_hash String   @db.VarChar()
+  to_address_hash   String   @db.VarChar()
+
+  @@map("send_message_events")
+}
+
+model ConversationEvent {
+  address_a_hash String   @db.VarChar()
+  address_b_hash String   @db.VarChar()
+  time           DateTime @default(now())
+
+  // TODO(achilles@daopanel.com) There should be an additional unique
+  // constraint on this table that cannot be modeled using prisma schema:
+  // when checking for uniqueness, we need to treat [X, Y] as the same
+  // conversation as [Y, X].
+
+  @@id([address_a_hash, address_b_hash])
+  @@map("conversation_events")
+}
+
+model CreateConversationEvent {
+  id                String   @id @default(uuid())
+  time              DateTime @default(now())
+  from_address_hash String   @db.VarChar()
+  to_address_hash   String   @db.VarChar()
+
+  @@map("create_conversation_events")
+}

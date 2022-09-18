@@ -28,6 +28,9 @@ Phase 1 -> Keep all code via web3 calls
 Phase 2 -> Deploy on optimism and polygon
 Phase 3 -> Change to ACL superfluid to improve game UX
 
+## Reference Libraries used
+1. We used https://github.com/relaycc/relay for the xmtp chat client
+2. We used graph-client/javascript-cjs for the graph-relayer module
 
 ## Issues
 
