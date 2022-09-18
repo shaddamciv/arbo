@@ -44,7 +44,7 @@ const MessageText = styled.p`
   color: var(--color);
   font-style: normal;
   font-weight: 400;
-  font-size: 18px;
+  font-size: 12px;
   line-height: 22px;
   word-break: break-word;
 `;

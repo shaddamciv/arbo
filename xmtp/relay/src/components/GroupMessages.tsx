@@ -133,7 +133,7 @@ export const GroupMessages: FunctionComponent = () => {
 };
 
 const Page = styled.div`
-  height: 100%;
+  height: 80%;
   width: 100vw;
   background: white;
   display: flex;

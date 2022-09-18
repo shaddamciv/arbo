@@ -12,7 +12,7 @@ export interface MobileMessageSentByProps {
 
 export default function MobileMessageSentBy(props: MobileMessageSentByProps) {
   const { data: ensName } = useEnsName({ address: props.address });
-  const responsiveId = useResponsiveUserId(ensName, props.address, '');
+  const responsiveId = useResponsiveUserId(ensName, props.address.slice(0,15)+'...', '');
   return (
     <Aligned>
       {props.sentByMe || <Avatar address={props.address} />}

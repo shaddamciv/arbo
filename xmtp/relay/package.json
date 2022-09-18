@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && SKIP_SENTRY=true IS_LOCAL_PROD=true next build ",
+    "build": "prisma generate && SKIP_SENTRY=true IS_LOCAL_PROD=true next build",
     "start": "next start",
     "lint": "next lint",
     "prettier": "prettier --check .",

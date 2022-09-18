@@ -14,6 +14,7 @@ async function main() {
           owner
           maxGrowth
           currentGrowth
+          isFinished
           gardeners {
             id
             amount

@@ -31,6 +31,7 @@ export function handleWatered(event: Watered): void {
   entity.owner = event.address
   entity.currentGrowth =  event.params.totalGrowth
   entity.maxGrowth = event.params.maxGrowth
+  entity.isFinished = false;
 
   gardener.amount = gardener.amount.plus(event.params.amountWatered)
   gardener.address = event.params.gardener
@@ -58,6 +59,7 @@ export function handleWinner(event: Winner): void {
   // Entity fields can be set based on event parameters
   entity.owner = event.params.gardener
   entity.winner = event.params.gardener
+  entity.isFinished = true;
   // Entities can be written to the store with `.save()`
   entity.save()
 }

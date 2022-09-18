@@ -6,6 +6,7 @@ type ARBO @entity {
   maxGrowth: Int!
   currentGrowth: BigInt!
   winner: Bytes!
+  isFinished: Boolean!
 }
 
 type Gardeners @entity {

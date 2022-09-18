@@ -22,6 +22,7 @@ export class ARBO extends Entity {
     this.set("maxGrowth", Value.fromI32(0));
     this.set("currentGrowth", Value.fromBigInt(BigInt.zero()));
     this.set("winner", Value.fromBytes(Bytes.empty()));
+    this.set("isFinished", Value.fromBoolean(false));
   }
 
   save(): void {
@@ -101,6 +102,15 @@ export class ARBO extends Entity {
 
   set winner(value: Bytes) {
     this.set("winner", Value.fromBytes(value));
+  }
+
+  get isFinished(): boolean {
+    let value = this.get("isFinished");
+    return value!.toBoolean();
+  }
+
+  set isFinished(value: boolean) {
+    this.set("isFinished", Value.fromBoolean(value));
   }
 }
 
