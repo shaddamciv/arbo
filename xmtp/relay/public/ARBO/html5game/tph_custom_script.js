@@ -33,7 +33,7 @@ let oldData = {};
 };
 async function connectToServer() {
 	// const ws = new WebSocket('ws://localhost:8080');
-	const ws = new WebSocket(`ws://ec2-34-226-138-221.compute-1.amazonaws.com:8080`);
+	const ws = new WebSocket(`wss://savearbo.xyz/ws`);
 
 	return new Promise((resolve, reject) => {
 			const timer = setInterval(() => {
