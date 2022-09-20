@@ -174,13 +174,13 @@ const List = styled.ul<{ isMobile: boolean }>`
   flex-direction: column;
   width: 100%;
   overflow: scroll;
-  height: ${({ isMobile }) => (isMobile ? 'calc(100vh - 200px)' : '100vh')};
+  height: ${({ isMobile }) => (isMobile ? 'calc(80vh - 200px)' : '100vh')};
   z-index: 10;
 `;
 
 const Page = styled.div`
   width: 100vw;
-  height: 100%;
+  height: 80%;
 `;
 
 const Centered = styled.div`
