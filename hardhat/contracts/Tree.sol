@@ -6,7 +6,7 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Holder} from "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-
+import "IGrow.sol";
 import "hardhat/console.sol";
 
 /// @title Tree NFT, derived from tradeable cashflow as a starter
@@ -20,9 +20,9 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
 
     Counters.Counter private _tokenIdCounter;
 
-    event Watered(address gardener, uint256 tokenId, uint256 amountWatered, uint256 totalGrowth, uint8 maxGrowth);
-    event Winner(address gardener, uint256 tokenId, uint amountWon);
-    event WithdrawWinnings(uint tokenId, uint amountWon);
+    event Watered(address gardener, uint256 tokenId, int96 amountWatered, uint256 totalGrowth, uint8 maxGrowth, int96 totalFlowRate);
+    event Winner(address gardener, uint256 tokenId, uint256 amountWon);
+    event WithdrawWinnings(uint256 tokenId, uint256 amountWon);
 
     struct TreeMeta {
         uint8 currentGrowth; //no need to grow more than 256
@@ -42,7 +42,7 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         ISuperfluid host,
         ISuperToken acceptedToken
     ) ERC721(_name, _symbol) RedirectAll(host, acceptedToken) { 
-        plantATree(55); 
+        plantATree(35); 
     }
 
     function plantATree(uint8 maxGrowth) public onlyOwner {
@@ -50,8 +50,8 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _mint(address(this), tokenId);
-        emit Watered(address(this), tokenId, 0, 0, maxGrowth);
-        initTree(tokenId, maxGrowth ,address(this));
+        emit Watered(address(this), tokenId, 0, 0, maxGrowth,0);
+        initTree(tokenId, maxGrowth);
     }
 
     function withdrawFunds(uint tokenId) external {
@@ -63,20 +63,21 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         emit WithdrawWinnings(tokenId, myTree.amountWon); 
     }
 
-    function initTree(uint tokenId, uint8 maxGrowth, address gardener) private {
+    function initTree(uint tokenId, uint8 maxGrowth) private {
         trees[tokenId].currentGrowth = 0;
         trees[tokenId].maxGrowth = maxGrowth;
     }
     
-    function waterTree(int96 flowRate, address gardener) internal {
+    function _waterTree(int96 flowRate, int96 inNetFlowRate, address gardener, bool isStopped) internal override {
         uint256 tokenId = _tokenIdCounter.current()-1;
         TreeMeta storage myTree = trees[tokenId];
+        //TODO:block the same user from turning on and off the tap too many times
 
         require(myTree.isWon == 0, "This ARBO is already grown!");
         uint8 latestFlowCap = flowCap(flowRate);
-        uint8 amountWatered = latestFlowCap * getMultiplierCapped();
-        myTree.currentGrowth = trees[tokenId].currentGrowth + amountWatered;
-        emit Watered(gardener, tokenId, amountWatered, myTree.currentGrowth, trees[tokenId].maxGrowth);
+        uint8 amountWateredInTotal = latestFlowCap * getBoost();// a not so random boost to the growth of the tree
+        myTree.currentGrowth = trees[tokenId].currentGrowth + amountWateredInTotal;
+        emit Watered(gardener, tokenId, flowRate, myTree.currentGrowth, myTree.maxGrowth, inNetFlowRate);
 
         if( latestFlowCap > lastFlowCap ) {
             //dilemma, remove existing winners and add new winner
@@ -89,7 +90,7 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         {
             winners.push(gardener);
         }
-        
+        lastFlowCap = latestFlowCap;
 
         if(myTree.currentGrowth >= myTree.maxGrowth) {
             //this player has watered the tree above the required height
@@ -107,7 +108,8 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
                 //alas, a gardener has taken a tree from the forest
                 //use tellor to get a random number and choose one of the winners
                 //for now we just use winner 0
-                _approve(winners[0], _tokenIdCounter.current()-1);
+                // uint randomNumber = IGrow(_grow).getRandomNumber();
+                _approve(winners[randomNumber], _tokenIdCounter.current()-1);
                 emit Winner(winners[0], _tokenIdCounter.current()-1, myTree.amountWon);
             }
         }
@@ -130,26 +132,21 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         // here we need to add a function to collect some fees for toucan and the small gardeners
             // _changeReceiver(to);
     }
-
-    function _updateTreeStatus(int96 inFlowRate, address gardener)
-        internal
-        override
-    {
-        waterTree(inFlowRate, gardener);
-    }
     
     function getTreeInfo(uint tokenId) public view returns(TreeMeta memory treeInfo) {
         TreeMeta memory myTree = trees[tokenId];
         return myTree;
     }
 
-    //100 MATIC = 100 $
-    //1 Matic - Small sprite - we will pay him a fee when the winner withdraws
+    //1 DAI - Small sprite - we will pay him a fee when the winner withdraws
     //list of small sprites will be in a  pool
     // if the same user tries to increase flow it has to be 10 times else revert
     function flowCap(int96 a) public pure returns (uint8) {
-        uint8 growBy = 1;
-        if( a > 100 && a <= 1000 ){
+        uint8 growBy = 0;
+        if( a > 0 && a <= 100 ){
+            growBy = 1;
+        }
+        else if( a > 100 && a <= 1000 ){
             growBy = 2;
         } else if( a > 10000 && a <= 100000 ){
             growBy = 3;
@@ -161,7 +158,7 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         return growBy;
     }
 
-    function getMultiplierCapped() public view returns(uint8) {
+    function getBoost() public view returns(uint8) {
        return uint8(block.number%10);
     }
 }

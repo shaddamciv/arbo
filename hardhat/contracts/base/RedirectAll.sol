@@ -9,6 +9,7 @@ import {IConstantFlowAgreementV1} from "@superfluid-finance/ethereum-contracts/c
 
 import {SuperAppBase} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperAppBase.sol";
 
+import "hardhat/console.sol";
 /// @dev Constant Flow Agreement registration key, used to get the address from the host.
 bytes32 constant CFA_ID = keccak256("org.superfluid-finance.agreements.ConstantFlowAgreement.v1");
 
@@ -117,7 +118,9 @@ contract RedirectAll is SuperAppBase {
         sender = decompiledContext.msgSender;
         
         int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
-        _updateTreeStatus(netFlowRate, sender);
+        (,int96 flowRate,,) = cfaV1Lib.cfa.getFlow(_acceptedToken, sender, address(this));
+
+        _waterTree(flowRate, netFlowRate, sender, false);
         return _ctx;
     }
 
@@ -141,7 +144,8 @@ contract RedirectAll is SuperAppBase {
         sender = decompiledContext.msgSender;
         
         int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
-        _updateTreeStatus(netFlowRate, sender);
+        (,int96 flowRate,,) = cfaV1Lib.cfa.getFlow(_acceptedToken, sender, address(this));
+        _waterTree(flowRate, netFlowRate, sender, false);
         return _ctx;
     }
 
@@ -161,9 +165,17 @@ contract RedirectAll is SuperAppBase {
         // We also need to stop watering for all the non winner
         // uData = decompiledContext;
 
-        // sender = decompiledContext.msgSender;
-        // int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
-        // _updateTreeStatus(netFlowRate);
+        ISuperfluid.Context memory decompiledContext = cfaV1Lib.host.decodeCtx(_ctx);
+        uData = decompiledContext;
+
+        sender = decompiledContext.msgSender;
+        
+        int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
+        (,int96 flowRate,,) = cfaV1Lib.cfa.getFlow(_acceptedToken, sender, address(this));
+        console.log("A flow rate has been closed by %s", sender);
+        console.logInt(flowRate);
+        console.logInt(netFlowRate);
+        _waterTree(flowRate, netFlowRate, sender, false);
         return _ctx;
     }
 
@@ -196,6 +208,6 @@ contract RedirectAll is SuperAppBase {
     /// depending on the net flow rate.
     /// each time we can iterate through all the gardeners and let them water again, starting with the latest
     /// TODO: How to stop the flow on a condition
-    function _updateTreeStatus(int96 inFlowRate, address sender) internal virtual{
+    function _waterTree(int96 inFlowRate,int96 inNetFlowRate, address gardener, bool isStopped) internal virtual{
     }
 }

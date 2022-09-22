@@ -97,6 +97,20 @@ beforeEach(async function () {
     })
 
     await daixUpgradeOperation.exec(accounts[0])
+    //give Bob some as well
+    await dai
+    .connect(accounts[0])
+    .mint(accounts[1].address, ethers.utils.parseEther("1000"))
+
+    await dai
+        .connect(accounts[1])
+        .approve(daix.address, ethers.utils.parseEther("1000"))
+
+    const daixUpgradeOperationBob = daix.upgrade({
+        amount: ethers.utils.parseEther("1000")
+    })
+
+    await daixUpgradeOperationBob.exec(accounts[1])
 
     const daiBal = await daix.balanceOf({
         account: accounts[0].address,
@@ -117,7 +131,6 @@ describe("watering plants", async function () {
             flowRate: "1000"
         })
 
-
         const txn = await createFlowOperation.exec(accounts[0])
         console.log(initialTreeData[0], ethers.BigNumber.from("0"))
 
@@ -131,9 +144,29 @@ describe("watering plants", async function () {
             "it did not start as a seed"
         )
 
-        assert.closeTo(parseInt(afterFlowTreeData[0].toString()), 5, 5, "Tree has not grown by a correct amount")
+        assert.closeTo(parseInt(afterFlowTreeData[0].toString()), 10, 10, "Tree has not grown by a correct amount")
     })
-    xit("Case #2 - Alice can win the arbo", async () => {
+    it("Case #1.a - Bob waters arbo", async () => {
+        console.log("Tree address - ",Tree.address, "Bobs's Address is - ", accounts[1].address)
+
+        const initialTreeData = await Tree.getTreeInfo(ethers.BigNumber.from("0"))
+
+        const createFlowOperation = sf.cfaV1.createFlow({
+            receiver: Tree.address,
+            superToken: daix.address,
+            flowRate: "1000"
+        })
+
+        const txn = await createFlowOperation.exec(accounts[1])
+
+        await txn.wait()
+
+        const afterFlowTreeData = await Tree.getTreeInfo(ethers.BigNumber.from("0"))
+
+        assert.closeTo(parseInt(afterFlowTreeData[0].toString()), 10, 20, "Tree has not grown by a correct amount")
+    })
+    //Assumption is the initial tree was planted with max Growth of 35
+    it("Case #2 - Alice can win the arbo", async () => {
         console.log("Tree address - ",Tree.address, "Alice's Address is - ", accounts[0].address)
 
         const initialTreeData = await Tree.getTreeInfo(ethers.BigNumber.from("0"))
