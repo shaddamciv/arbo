@@ -9,7 +9,6 @@ import {IConstantFlowAgreementV1} from "@superfluid-finance/ethereum-contracts/c
 
 import {SuperAppBase} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperAppBase.sol";
 
-import "hardhat/console.sol";
 /// @dev Constant Flow Agreement registration key, used to get the address from the host.
 bytes32 constant CFA_ID = keccak256("org.superfluid-finance.agreements.ConstantFlowAgreement.v1");
 
@@ -172,9 +171,9 @@ contract RedirectAll is SuperAppBase {
         
         int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
         (,int96 flowRate,,) = cfaV1Lib.cfa.getFlow(_acceptedToken, sender, address(this));
-        console.log("A flow rate has been closed by %s", sender);
-        console.logInt(flowRate);
-        console.logInt(netFlowRate);
+        // console.log("A flow rate has been closed by %s", sender);
+        // console.logInt(flowRate);
+        // console.logInt(netFlowRate);
         _waterTree(flowRate, netFlowRate, sender, false);
         return _ctx;
     }
@@ -182,27 +181,27 @@ contract RedirectAll is SuperAppBase {
     // ---------------------------------------------------------------------------------------------
     // INTERNAL LOGIC
 
-    /// @dev Changes receiver and redirects all flows to the new one. Logs `ReceiverChanged`.
-    /// @param newReceiver The new receiver to redirect to.
-    function _changeReceiver(address newReceiver) internal {
-        if (newReceiver == address(0)) revert InvalidReceiver();
+    // /// @dev Changes receiver and redirects all flows to the new one. Logs `ReceiverChanged`.
+    // /// @param newReceiver The new receiver to redirect to.
+    // function _changeReceiver(address newReceiver) internal {
+    //     if (newReceiver == address(0)) revert InvalidReceiver();
 
-        if (cfaV1Lib.host.isApp(ISuperApp(newReceiver))) revert ReceiverIsSuperApp();
+    //     if (cfaV1Lib.host.isApp(ISuperApp(newReceiver))) revert ReceiverIsSuperApp();
 
-        if (newReceiver == _receiver) return;
+    //     if (newReceiver == _receiver) return;
         
 
-            cfaV1Lib.createFlow(
-                newReceiver,
-                _acceptedToken,
-                cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this))
-            );
-        // }
+    //         cfaV1Lib.createFlow(
+    //             newReceiver,
+    //             _acceptedToken,
+    //             cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this))
+    //         );
+    //     // }
 
-        _receiver = newReceiver;
+    //     _receiver = newReceiver;
 
-        emit ReceiverChanged(newReceiver);
-    }
+    //     emit ReceiverChanged(newReceiver);
+    // }
 
     /// @dev Updates the tree growth status. The flow is either created, updated, or deleted, 
     /// depending on the net flow rate.
