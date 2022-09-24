@@ -174,7 +174,7 @@ contract RedirectAll is SuperAppBase {
         // console.log("A flow rate has been closed by %s", sender);
         // console.logInt(flowRate);
         // console.logInt(netFlowRate);
-        _waterTree(flowRate, netFlowRate, sender, false);
+        _waterTree(flowRate, netFlowRate, sender, true);
         return _ctx;
     }
 

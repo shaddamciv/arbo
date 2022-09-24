@@ -8,8 +8,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./interfaces/IWinner.sol";
 import "./interfaces/ITree.sol";
+import "hardhat/console.sol";
 //TOTEST: Remove zero waterer from subgraph
-//TODO: Make watering plants time based
+//TOTEST: Make watering plants time based
 
 //TODO: Add Tellor Contract in testing, also need to send tip tx into their discord
 //TODO: Deploy and test on optimism
@@ -79,6 +80,8 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         ITree.TreeMeta storage myTree = trees[tokenId];
 
         require(myTree.isWon == 0, "This ARBO is already grown!");
+        console.log("The flow rate %s", isStopped);
+        console.logInt(flowRate);
         uint8 latestFlowCap = flowCap(flowRate);
         uint8 amountWateredInTotal = latestFlowCap * getBoost(); // a not so random boost to the growth of the tree
         myTree.currentGrowth =
@@ -92,7 +95,6 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
             myTree.maxGrowth,
             inNetFlowRate
         );
-        // console.log("The winner is %s", winner);
 
         (bool isWon, address winningAddress) = IWinner(winner).setWinners(
             tokenId,
@@ -118,8 +120,6 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
             );
             if (winningAddress != address(0)) {
                 _approve(winningAddress, _tokenIdCounter.current() - 1);
-            } else {
-                //distribute via IDA contract
             }
         }
     }

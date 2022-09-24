@@ -48,12 +48,12 @@ contract Winner {
         );
     }
 
-    function initalizeIndex(uint256 tokenId) public {
+    function initalizeIndex(uint32 tokenId) internal {
         if (initializedIndex[tokenId] == true) {
             return;
         }
         initializedIndex[tokenId] = true;
-        idaV1.createIndex(spreaderToken, uint32(tokenId));
+        idaV1.createIndex(spreaderToken, tokenId);
     }
 
     function setTree(address _tree) public {
@@ -94,15 +94,17 @@ contract Winner {
 
     //setWinner should only be called by tree address
     function setWinners(
-        uint8 tokenID,
+        uint256 tokenID,
         uint8 latestFlowCap,
         address gardener,
         bool isStopped,
         uint8 currentGrowth,
         uint8 maxGrowth
     ) external returns (bool __isWon, address __winner) {
-        require(msg.sender == tree);
-        console.log("Inside setWinners", latestFlowCap);
+        console.log("Inside setWinners %s and tokenid is %s", latestFlowCap, tokenID%(2**32 -1));
+
+        require(msg.sender == tree,"Not the tree");
+        // initalizeIndex(uint32(tokenID));
         if (isStopped) {
             winnerStreamTimes[tokenID][gardener].timeSpent =
                 block.timestamp -
