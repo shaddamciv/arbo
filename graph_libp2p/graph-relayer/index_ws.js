@@ -1,4 +1,4 @@
-import { execute } from './graphclient/index.js'
+import { execute } from './.graphclient/index.js'
 import WebSocket, { WebSocketServer } from 'ws';
 import * as Diff from 'diff';
 
@@ -20,9 +20,10 @@ async function main() {
             amount
             address
           }
-        }
+        
         winner
       }
+    }
     `,
     {},
   )
