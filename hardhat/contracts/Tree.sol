@@ -95,6 +95,7 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         // console.log("The winner is %s", winner);
 
         (bool isWon, address winningAddress) = IWinner(winner).setWinners(
+            tokenId,
             latestFlowCap,
             gardener,
             isStopped,
