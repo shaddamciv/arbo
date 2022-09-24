@@ -1,6 +1,17 @@
 query ExampleQuery @live {
-  arbos(first: 2) {
-    id
-    owner
+ arbos {
+          id
+          count
+          owner
+          maxGrowth
+          currentGrowth
+          isFinished
+          gardeners {
+            id
+            amount
+            address
+          }
+        
+    winner
   }
 }

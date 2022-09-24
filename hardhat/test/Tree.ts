@@ -12,7 +12,8 @@ const   deploySuperToken =require(   "@superfluid-finance/ethereum-contracts/scr
 // This is only used in the set up, and these are the only functions called in this script.
 const daiABI = [
     "function mint(address to,uint256 amount) returns (bool)",
-    "function approve(address,uint256) returns (bool)"
+    "function approve(address,uint256) returns (bool)",
+    "function balanceOf(address) returns (uint)"
 ]
 
 const provider = web3
@@ -75,18 +76,30 @@ before(async function () {
     dai = new ethers.Contract(daiAddress, daiABI, accounts[0])
     let App = await ethers.getContractFactory("Tree", accounts[0])
 
+    const Grow = await ethers.getContractFactory("Grow");
+    const grow = await Grow.deploy("0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A", 
+                                    "0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A",
+                                    "0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A",
+                                    1000);
+    console.log("The Grow address is - ", grow.address)
+    const Winner = await ethers.getContractFactory("Winner");
+    const winner = await Winner.deploy(grow.address);
+    console.log("The winner address is - ", winner.address)
     Tree = await App.deploy(
         "Grow ARBO",
         "ARBO",
         sf.settings.config.hostAddress,
-        daix.address
+        daix.address,
+        winner.address
     )
+
+    await winner.setTree(Tree.address);
 })
 
 beforeEach(async function () {
     await dai
         .connect(accounts[0])
-        .mint(accounts[0].address, ethers.utils.parseEther("1000"))
+        .mint(accounts[0].address, ethers.utils.parseEther("1001"))
 
     await dai
         .connect(accounts[0])
@@ -97,6 +110,20 @@ beforeEach(async function () {
     })
 
     await daixUpgradeOperation.exec(accounts[0])
+    //give Bob some as well
+    await dai
+    .connect(accounts[0])
+    .mint(accounts[1].address, ethers.utils.parseEther("1000"))
+
+    await dai
+        .connect(accounts[1])
+        .approve(daix.address, ethers.utils.parseEther("1000"))
+
+    const daixUpgradeOperationBob = daix.upgrade({
+        amount: ethers.utils.parseEther("1000")
+    })
+
+    await daixUpgradeOperationBob.exec(accounts[1])
 
     const daiBal = await daix.balanceOf({
         account: accounts[0].address,
@@ -109,7 +136,7 @@ describe("watering plants", async function () {
     it("Case #1 - Alice waters arbo", async () => {
         console.log("Tree address - ",Tree.address, "Alice's Address is - ", accounts[0].address)
 
-        const initialTreeData = await Tree.getTreeInfo(ethers.BigNumber.from("0"))
+        const initialTreeData = await Tree.trees(ethers.BigNumber.from("0"))
 
         const createFlowOperation = sf.cfaV1.createFlow({
             receiver: Tree.address,
@@ -117,13 +144,12 @@ describe("watering plants", async function () {
             flowRate: "1000"
         })
 
-
         const txn = await createFlowOperation.exec(accounts[0])
         console.log(initialTreeData[0], ethers.BigNumber.from("0"))
 
         await txn.wait()
 
-        const afterFlowTreeData = await Tree.getTreeInfo(ethers.BigNumber.from("0"))
+        const afterFlowTreeData = await Tree.trees(ethers.BigNumber.from("0"))
 
         assert.equal(
             initialTreeData[0].toString(),
@@ -131,12 +157,32 @@ describe("watering plants", async function () {
             "it did not start as a seed"
         )
 
-        assert.closeTo(parseInt(afterFlowTreeData[0].toString()), 5, 5, "Tree has not grown by a correct amount")
+        assert.closeTo(parseInt(afterFlowTreeData[0].toString()), 10, 10, "Tree has not grown by a correct amount")
     })
-    xit("Case #2 - Alice can win the arbo", async () => {
+    it("Case #1.a - Bob waters arbo", async () => {
+        console.log("Tree address - ",Tree.address, "Bobs's Address is - ", accounts[1].address)
+
+        const initialTreeData = await Tree.trees(ethers.BigNumber.from("0"))
+
+        const createFlowOperation = sf.cfaV1.createFlow({
+            receiver: Tree.address,
+            superToken: daix.address,
+            flowRate: "1000"
+        })
+
+        const txn = await createFlowOperation.exec(accounts[1])
+
+        await txn.wait()
+
+        const afterFlowTreeData = await Tree.trees(ethers.BigNumber.from("0"))
+
+        assert.closeTo(parseInt(afterFlowTreeData[0].toString()), 10, 20, "Tree has not grown by a correct amount")
+    })
+    //Assumption is the initial tree was planted with max Growth of 35
+    it("Case #2 - Alice can win the arbo", async () => {
         console.log("Tree address - ",Tree.address, "Alice's Address is - ", accounts[0].address)
 
-        const initialTreeData = await Tree.getTreeInfo(ethers.BigNumber.from("0"))
+        const initialTreeData = await Tree.trees(ethers.BigNumber.from("0"))
 
         const createFlowOperation = sf.cfaV1.updateFlow({
             receiver: Tree.address,
@@ -148,7 +194,7 @@ describe("watering plants", async function () {
 
         await txn.wait()
 
-        const afterFlowTreeData = await Tree.getTreeInfo(ethers.BigNumber.from("0"))
+        const afterFlowTreeData = await Tree.trees(ethers.BigNumber.from("0"))
         console.log("The afterFlowTreeData in bal - ", afterFlowTreeData[3].toString())
         const stopFlowOperation2 = sf.cfaV1.deleteFlow({
             sender: accounts[0].address,
@@ -163,7 +209,7 @@ describe("watering plants", async function () {
         await stopFlowOperation2Txn.wait()
         assert.equal(afterFlowTreeData[2].toString(), "1", "Tree was not won")
     })
-    xit("Case #3 - Alice can win and withdraw", async () => {
+    it("Case #3 - Alice can win and withdraw", async () => {
         const account0BalanceInit = await daix.balanceOf({
             account: accounts[0].address,
             providerOrSigner: accounts[0]
@@ -181,83 +227,11 @@ describe("watering plants", async function () {
             account: accounts[0].address,
             providerOrSigner: accounts[0]
         })
-        const diffBal = account0Balance - account0BalanceInit;
-        console.log("The difference in bal - ", diffBal)
-        assert.equal(diffBal, 0, "Alice did not manage to withdraw funds")
+        const diffBal = ethers.BigNumber.from(account0Balance).sub(ethers.BigNumber.from(account0BalanceInit));
+        console.log("The difference in bal - ",account0Balance,account0BalanceInit, diffBal)
+        // alice has made some money
+        assert.isAtLeast(diffBal.toNumber(), 1000, "Alice did not manage to withdraw funds")
 
-    })
-
-    xit("Case 3: multiple users send flows into contract", async () => {
-        const appInitialBalance = await daix.balanceOf({
-            account: Tree.address,
-            providerOrSigner: accounts[0]
-        })
-
-        const initialOwnerFlowRate = await sf.cfaV1.getNetFlow({
-            superToken: daix.address,
-            account: accounts[1].address,
-            providerOrSigner: superSigner
-        })
-
-        console.log("initial owner flow rate: ", initialOwnerFlowRate)
-
-        console.log(accounts[2].address)
-
-        const daixTransferOperation = daix.transfer({
-            receiver: accounts[2].address,
-            amount: ethers.utils.parseEther("500")
-        })
-
-        await daixTransferOperation.exec(accounts[0])
-
-        const account2Balance = await daix.balanceOf({
-            account: accounts[2].address,
-            providerOrSigner: superSigner
-        })
-        console.log("account 2 balance ", account2Balance)
-
-        const createFlowOperation2 = sf.cfaV1.createFlow({
-            receiver: Tree.address,
-            superToken: daix.address,
-            flowRate: "100000000"
-        })
-
-        const createFlowOperation2Txn = await createFlowOperation2.exec(
-            accounts[2]
-        )
-
-        await createFlowOperation2Txn.wait()
-
-        const appFlowRate = await sf.cfaV1.getNetFlow({
-            superToken: daix.address,
-            account: Tree.address,
-            providerOrSigner: superSigner
-        })
-
-        const appFinalBalance = await daix.balanceOf({
-            account: Tree.address,
-            providerOrSigner: superSigner
-        })
-
-        const updatedOwnerFlowRate2 = await sf.cfaV1.getNetFlow({
-            superToken: daix.address,
-            account: accounts[1].address,
-            providerOrSigner: superSigner
-        })
-
-        assert.equal(
-            updatedOwnerFlowRate2,
-            "300000000",
-            "owner not receiving correct updated flowRate"
-        )
-
-        assert.equal(appFlowRate, 0, "App flowRate not zero")
-
-        assert.equal(
-            appInitialBalance.toString(),
-            appFinalBalance.toString(),
-            "balances aren't equal"
-        )
     })
 
     //need deletion case

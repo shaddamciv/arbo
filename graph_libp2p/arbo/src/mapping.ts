@@ -37,9 +37,19 @@ export function handleWatered(event: Watered): void {
   gardener.address = event.params.gardener
   gardener.save()
 
-  if (gardener) {
+  if (gardener && gardener.amount.gt(BigInt.fromI32(0))) {
     let gardeners = entity.gardeners
     gardeners.push(gardener.id)
+    entity.gardeners = gardeners
+  }
+  if (gardener && gardener.amount.equals(BigInt.fromI32(0))) {
+    //this gardener stopped watering time to remove him from the list
+    let gardeners = entity.gardeners
+    const index = gardeners.indexOf(gardener.id, 0);
+    if (index > -1) {
+      gardeners.splice(index, 1);
+    }
+
     entity.gardeners = gardeners
   }
   // Entities can be written to the store with `.save()`

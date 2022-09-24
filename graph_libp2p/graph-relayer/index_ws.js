@@ -20,8 +20,10 @@ async function main() {
             amount
             address
           }
-        }
+        
+        winner
       }
+    }
     `,
     {},
   )

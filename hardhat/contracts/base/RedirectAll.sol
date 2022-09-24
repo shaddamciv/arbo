@@ -117,7 +117,9 @@ contract RedirectAll is SuperAppBase {
         sender = decompiledContext.msgSender;
         
         int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
-        _updateTreeStatus(netFlowRate, sender);
+        (,int96 flowRate,,) = cfaV1Lib.cfa.getFlow(_acceptedToken, sender, address(this));
+
+        _waterTree(flowRate, netFlowRate, sender, false);
         return _ctx;
     }
 
@@ -141,7 +143,8 @@ contract RedirectAll is SuperAppBase {
         sender = decompiledContext.msgSender;
         
         int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
-        _updateTreeStatus(netFlowRate, sender);
+        (,int96 flowRate,,) = cfaV1Lib.cfa.getFlow(_acceptedToken, sender, address(this));
+        _waterTree(flowRate, netFlowRate, sender, false);
         return _ctx;
     }
 
@@ -161,41 +164,49 @@ contract RedirectAll is SuperAppBase {
         // We also need to stop watering for all the non winner
         // uData = decompiledContext;
 
-        // sender = decompiledContext.msgSender;
-        // int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
-        // _updateTreeStatus(netFlowRate);
+        ISuperfluid.Context memory decompiledContext = cfaV1Lib.host.decodeCtx(_ctx);
+        uData = decompiledContext;
+
+        sender = decompiledContext.msgSender;
+        
+        int96 netFlowRate = cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this));
+        (,int96 flowRate,,) = cfaV1Lib.cfa.getFlow(_acceptedToken, sender, address(this));
+        // console.log("A flow rate has been closed by %s", sender);
+        // console.logInt(flowRate);
+        // console.logInt(netFlowRate);
+        _waterTree(flowRate, netFlowRate, sender, false);
         return _ctx;
     }
 
     // ---------------------------------------------------------------------------------------------
     // INTERNAL LOGIC
 
-    /// @dev Changes receiver and redirects all flows to the new one. Logs `ReceiverChanged`.
-    /// @param newReceiver The new receiver to redirect to.
-    function _changeReceiver(address newReceiver) internal {
-        if (newReceiver == address(0)) revert InvalidReceiver();
+    // /// @dev Changes receiver and redirects all flows to the new one. Logs `ReceiverChanged`.
+    // /// @param newReceiver The new receiver to redirect to.
+    // function _changeReceiver(address newReceiver) internal {
+    //     if (newReceiver == address(0)) revert InvalidReceiver();
 
-        if (cfaV1Lib.host.isApp(ISuperApp(newReceiver))) revert ReceiverIsSuperApp();
+    //     if (cfaV1Lib.host.isApp(ISuperApp(newReceiver))) revert ReceiverIsSuperApp();
 
-        if (newReceiver == _receiver) return;
+    //     if (newReceiver == _receiver) return;
         
 
-            cfaV1Lib.createFlow(
-                newReceiver,
-                _acceptedToken,
-                cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this))
-            );
-        // }
+    //         cfaV1Lib.createFlow(
+    //             newReceiver,
+    //             _acceptedToken,
+    //             cfaV1Lib.cfa.getNetFlow(_acceptedToken, address(this))
+    //         );
+    //     // }
 
-        _receiver = newReceiver;
+    //     _receiver = newReceiver;
 
-        emit ReceiverChanged(newReceiver);
-    }
+    //     emit ReceiverChanged(newReceiver);
+    // }
 
     /// @dev Updates the tree growth status. The flow is either created, updated, or deleted, 
     /// depending on the net flow rate.
     /// each time we can iterate through all the gardeners and let them water again, starting with the latest
     /// TODO: How to stop the flow on a condition
-    function _updateTreeStatus(int96 inFlowRate, address sender) internal virtual{
+    function _waterTree(int96 inFlowRate,int96 inNetFlowRate, address gardener, bool isStopped) internal virtual{
     }
 }

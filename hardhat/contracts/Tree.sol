@@ -6,9 +6,14 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Holder} from "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "./interfaces/IWinner.sol";
+import "./interfaces/ITree.sol";
+//TOTEST: Remove zero waterer from subgraph
+//TODO: Make watering plants time based
 
-import "hardhat/console.sol";
-
+//TODO: Add Tellor Contract in testing, also need to send tip tx into their discord
+//TODO: Deploy and test on optimism
+//TODO: Change font xmtp
 /// @title Tree NFT, derived from tradeable cashflow as a starter
 /// @notice Inherits the ERC721 NFT interface from Open Zeppelin and the RedirectAll logic to
 /// redirect all incoming streams to the current NFT holder.
@@ -20,29 +25,30 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
 
     Counters.Counter private _tokenIdCounter;
 
-    event Watered(address gardener, uint256 tokenId, uint256 amountWatered, uint256 totalGrowth, uint8 maxGrowth);
-    event Winner(address gardener, uint256 tokenId, uint amountWon);
-    event WithdrawWinnings(uint tokenId, uint amountWon);
+    event Watered(
+        address gardener,
+        uint256 tokenId,
+        int96 amountWatered,
+        uint256 totalGrowth,
+        uint8 maxGrowth,
+        int96 totalFlowRate
+    );
+    event Winner(address gardener, uint256 tokenId, uint256 amountWon);
+    event WithdrawWinnings(uint256 tokenId, uint256 amountWon);
 
-    struct TreeMeta {
-        uint8 currentGrowth; //no need to grow more than 256
-        uint8 maxGrowth; // the max that this tree can grow to
-        uint8 isWon;
-        uint256 amountWon;// a random multiplier based on price of native token
-    }
-
-    mapping(uint => TreeMeta) public trees;
-    address[] public winners;
-    uint prevBalance;
-    uint lastFlowCap;
+    mapping(uint256 => ITree.TreeMeta) public trees;
+    uint256 public prevBalance;
+    address public winner;
 
     constructor(
         string memory _name,
         string memory _symbol,
         ISuperfluid host,
-        ISuperToken acceptedToken
-    ) ERC721(_name, _symbol) RedirectAll(host, acceptedToken) { 
-        plantATree(55); 
+        ISuperToken acceptedToken,
+        address _winner
+    ) ERC721(_name, _symbol) RedirectAll(host, acceptedToken) {
+        plantATree(35);
+        winner = _winner;
     }
 
     function plantATree(uint8 maxGrowth) public onlyOwner {
@@ -50,70 +56,74 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _mint(address(this), tokenId);
-        emit Watered(address(this), tokenId, 0, 0, maxGrowth);
-        initTree(tokenId, maxGrowth ,address(this));
+        emit Watered(address(this), tokenId, 0, 0, maxGrowth, 0);
+        trees[tokenId].maxGrowth = maxGrowth;
     }
 
-    function withdrawFunds(uint tokenId) external {
+    function withdrawFunds(uint256 tokenId) external {
         require(ownerOf(tokenId) == msg.sender, "Not ARBO gardener!"); // make sure that its the winner
-        TreeMeta storage myTree = trees[tokenId];
+        ITree.TreeMeta storage myTree = trees[tokenId];
         // (bool success, bytes memory result) = address(_acceptedToken).delegatecall(abi.encodeWithSignature("transfer(address,uint256)", msg.sender, myTree.amountWon));
         // require(success, "Unable to transfer");
         ISuperToken(_acceptedToken).transfer(msg.sender, myTree.amountWon);
-        emit WithdrawWinnings(tokenId, myTree.amountWon); 
+        emit WithdrawWinnings(tokenId, myTree.amountWon);
     }
 
-    function initTree(uint tokenId, uint8 maxGrowth, address gardener) private {
-        trees[tokenId].currentGrowth = 0;
-        trees[tokenId].maxGrowth = maxGrowth;
-    }
-    
-    function waterTree(int96 flowRate, address gardener) internal {
-        uint256 tokenId = _tokenIdCounter.current()-1;
-        TreeMeta storage myTree = trees[tokenId];
+    function _waterTree(
+        int96 flowRate,
+        int96 inNetFlowRate,
+        address gardener,
+        bool isStopped
+    ) internal override {
+        uint256 tokenId = _tokenIdCounter.current() - 1;
+        ITree.TreeMeta storage myTree = trees[tokenId];
 
         require(myTree.isWon == 0, "This ARBO is already grown!");
         uint8 latestFlowCap = flowCap(flowRate);
-        uint8 amountWatered = latestFlowCap * getMultiplierCapped();
-        myTree.currentGrowth = trees[tokenId].currentGrowth + amountWatered;
-        emit Watered(gardener, tokenId, amountWatered, myTree.currentGrowth, trees[tokenId].maxGrowth);
+        uint8 amountWateredInTotal = latestFlowCap * getBoost(); // a not so random boost to the growth of the tree
+        myTree.currentGrowth =
+            trees[tokenId].currentGrowth +
+            amountWateredInTotal;
+        emit Watered(
+            gardener,
+            tokenId,
+            flowRate,
+            myTree.currentGrowth,
+            myTree.maxGrowth,
+            inNetFlowRate
+        );
+        // console.log("The winner is %s", winner);
 
-        if( latestFlowCap > lastFlowCap ) {
-            //dilemma, remove existing winners and add new winner
-            if(winners.length>0){
-                delete winners;
-            }
-            winners.push(gardener);
-        } 
-        else if(latestFlowCap == lastFlowCap)
-        {
-            winners.push(gardener);
-        }
-        
-
-        if(myTree.currentGrowth >= myTree.maxGrowth) {
-            //this player has watered the tree above the required height
-            // _approve(gardener, _tokenIdCounter.current()-1);
+        (bool isWon, address winningAddress) = IWinner(winner).setWinners(
+            tokenId,
+            latestFlowCap,
+            gardener,
+            isStopped,
+            myTree.currentGrowth,
+            myTree.maxGrowth
+        );
+        //set info if won
+        if (isWon) {
             myTree.isWon = 1;
-            uint currBalance = ISuperToken(_acceptedToken).balanceOf(address(this));
+            uint256 currBalance = ISuperToken(_acceptedToken).balanceOf(
+                address(this)
+            );
             myTree.amountWon = currBalance - prevBalance;
             prevBalance = currBalance;
-            if(lastFlowCap == 1) {
-                // everyone has worked together, the garden bestows rewards
-                // create an IDA contract with the amountWon + a small bonus reward to all winners list
-                 // burn the tree
-            }
-            else {
-                //alas, a gardener has taken a tree from the forest
-                //use tellor to get a random number and choose one of the winners
-                //for now we just use winner 0
-                _approve(winners[0], _tokenIdCounter.current()-1);
-                emit Winner(winners[0], _tokenIdCounter.current()-1, myTree.amountWon);
+
+            emit Winner(
+                winningAddress,
+                _tokenIdCounter.current() - 1,
+                myTree.amountWon
+            );
+            if (winningAddress != address(0)) {
+                _approve(winningAddress, _tokenIdCounter.current() - 1);
+            } else {
+                //distribute via IDA contract
             }
         }
-
     }
-    
+
     // ---------------------------------------------------------------------------------------------
     // BEFORE TOKEN TRANSFER CALLBACK
 
@@ -126,42 +136,38 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         uint256 // tokenId
     ) internal override {
         // transfer the flow to the new owner
-        // if(to != address(this))
-        // here we need to add a function to collect some fees for toucan and the small gardeners
-            // _changeReceiver(to);
+        // _collectFees();
+
+        // if (to != address(this)) _changeReceiver(to);
+        // here we need to add a function to collect some fees for BCT token retirements and the small gardeners
     }
 
-    function _updateTreeStatus(int96 inFlowRate, address gardener)
-        internal
-        override
-    {
-        waterTree(inFlowRate, gardener);
-    }
-    
-    function getTreeInfo(uint tokenId) public view returns(TreeMeta memory treeInfo) {
-        TreeMeta memory myTree = trees[tokenId];
-        return myTree;
+    function _collectFees() public payable {
+        require(msg.value == 0.01 ether, 'Only 0.01 nativeToken required to be transfered.');
+        payable(owner()).transfer(msg.value);
     }
 
-    //100 MATIC = 100 $
-    //1 Matic - Small sprite - we will pay him a fee when the winner withdraws
+    //1 DAI - Small sprite - we will pay him a fee when the winner withdraws
     //list of small sprites will be in a  pool
     // if the same user tries to increase flow it has to be 10 times else revert
     function flowCap(int96 a) public pure returns (uint8) {
-        uint8 growBy = 1;
-        if( a > 100 && a <= 1000 ){
+        uint8 growBy = 0;
+        if (a > 0 && a <= 100) {
+            growBy = 1;
+        } else if (a > 100 && a <= 1000) {
             growBy = 2;
-        } else if( a > 10000 && a <= 100000 ){
+        } else if (a > 10000 && a <= 100000) {
             growBy = 3;
-        } else if( a > 1000000 && a <= 10000000 ){
+        } else if (a > 1000000 && a <= 10000000) {
             growBy = 5;
-        } else if( a > 10000000 && a <= 100000000 ){
+        } else if (a > 10000000 && a <= 100000000) {
             growBy = 10;
         }
         return growBy;
     }
 
-    function getMultiplierCapped() public view returns(uint8) {
-       return uint8(block.number%10);
+    function getBoost() public view returns (uint8) {
+        return uint8(block.number % 10);
+        //we can use tellor here as well
     }
 }
