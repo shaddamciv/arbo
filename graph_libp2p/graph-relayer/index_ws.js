@@ -1,4 +1,4 @@
-import { execute } from './.graphclient/index.js'
+import { execute } from './graphclient/index.js'
 import WebSocket, { WebSocketServer } from 'ws';
 import * as Diff from 'diff';
 
