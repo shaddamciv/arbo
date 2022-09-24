@@ -5,6 +5,7 @@ import "hardhat/console.sol";
 
 contract Winner {
     address[] public winners;
+    mapping(address => uint) public winnerStreamTimes;
     uint256 lastFlowCap;
     address public tellor;
     address public tree;
@@ -23,7 +24,7 @@ contract Winner {
         bool isStopped,
         uint8 currentGrowth,
         uint8 maxGrowth
-    ) external returns (bool isWon, address winner) {
+    ) external returns (bool __isWon, address __winner) {
       require(msg.sender == tree);
         console.log("Inside setWinners", latestFlowCap);
 
