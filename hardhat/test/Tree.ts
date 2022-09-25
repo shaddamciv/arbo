@@ -106,7 +106,7 @@ before(async function () {
         daix.address,
         winner.address
     )
-        
+
     await winner.setTree(Tree.address);
 
 })
@@ -223,7 +223,7 @@ describe("watering plants", async function () {
         await txn.wait()
 
         const afterFlowTreeData = await Tree.trees(ethers.BigNumber.from("0"))
-        console.log("The afterFlowTreeData in bal - ", afterFlowTreeData[3].toString())
+        console.log("The afterFlowTreeData in bal - ", afterFlowTreeData)
         const stopFlowOperation2 = sf.cfaV1.deleteFlow({
             sender: accounts[0].address,
             receiver: Tree.address,
@@ -261,6 +261,30 @@ describe("watering plants", async function () {
         assert.isAtLeast(diffBal.toNumber(), 1000, "Alice did not manage to withdraw funds")
 
     })
+    //test this separately using it.only
+    xit("Case #5 - Both Alice and Bob wins an IDA", async () => {
+        
+        const plantAnIDATree = await Tree.plantATree(ethers.BigNumber.from("15"));
+        const createFlowOperation = sf.cfaV1.createFlow({
+            receiver: Tree.address,
+            superToken: daix.address,
+            flowRate: "1000"
+        })
+        const txn = await createFlowOperation.exec(accounts[0])
+        await txn.wait()
+        const IDATreeData1 = await Tree.trees(ethers.BigNumber.from("1"));
+        console.log("IDATreeData1 -- ",IDATreeData1);
+        const txnBob = await createFlowOperation.exec(accounts[1])
+        await txnBob.wait()
 
+        const IDATreeData = await Tree.trees(ethers.BigNumber.from("1"));
+        console.log("Trying to set shares");
+        console.log("IDATreeData -- ",IDATreeData);
+
+        await winner.setShares(ethers.BigNumber.from("1"))
+
+
+
+    })
     //need deletion case
 })

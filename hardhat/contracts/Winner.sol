@@ -7,8 +7,6 @@ import {IInstantDistributionAgreementV1} from "@superfluid-finance/ethereum-cont
 
 import {IDAv1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/IDAv1Library.sol";
 
-import "hardhat/console.sol";
-
 contract Winner {
     struct gameMeta {
         uint256 timeStart;
@@ -16,7 +14,7 @@ contract Winner {
     }
     address[] public winners;
     mapping(uint256 => mapping(address => gameMeta)) private winnerStreamTimes;
-
+    mapping(uint256 => bool) public canFetch;
     mapping(uint256 => bool) initializedIndex;
     mapping(uint256 => uint256) totalTimeSpent;
     uint256 lastFlowCap;
@@ -29,7 +27,11 @@ contract Winner {
     using IDAv1Library for IDAv1Library.InitData;
     IDAv1Library.InitData public idaV1;
 
-    constructor(address _tellor, ISuperfluid _host, ISuperToken _spreaderToken) {
+    constructor(
+        address _tellor,
+        ISuperfluid _host,
+        ISuperToken _spreaderToken
+    ) {
         tellor = _tellor;
         spreaderToken = _spreaderToken;
 
@@ -48,13 +50,12 @@ contract Winner {
         );
     }
 
-    function initalizeIndex(uint32 tokenId) external returns(bool) {
-        console.log("Initialize call attempted");
+    function initalizeIndex(uint32 tokenId) external returns (bool) {
         if (initializedIndex[tokenId] == true) {
             return false;
         }
         initializedIndex[tokenId] = true;
-        // idaV1.createIndex(spreaderToken, tokenId);
+        idaV1.createIndex(spreaderToken, tokenId);
         return true;
     }
 
@@ -65,6 +66,7 @@ contract Winner {
     // to be called after funding this contract from the Tree
     // for now this has to be manual
     function distribute(uint256 tokenId) public {
+        require(canFetch[tokenId] == true, "Cannot distribute shares yet!");
         //need to transfer from Tree contract
         uint256 spreaderTokenBalance = spreaderToken.balanceOf(address(this));
 
@@ -75,12 +77,23 @@ contract Winner {
             spreaderTokenBalance
         );
 
-        idaV1.distribute(spreaderToken, uint32(tokenId), actualDistributionAmount);
+        idaV1.distribute(
+            spreaderToken,
+            uint32(tokenId),
+            actualDistributionAmount
+        );
     }
 
-    function setShares(uint256 tokenId) internal {
+    function setShares(uint256 tokenId) external {
+        require(canFetch[tokenId] == true, "Cannot set shares yet!");
         //get the winners list and then calculate based on timeSpent
         for (uint256 i = 0; i < winners.length; i++) {
+            if (winnerStreamTimes[tokenId][winners[i]].timeSpent == 0) {
+                //force assume that they will stop the flow
+                winnerStreamTimes[tokenId][winners[i]].timeSpent =
+                    block.timestamp -
+                    winnerStreamTimes[tokenId][winners[i]].timeStart;
+            }
             uint256 share = totalTimeSpent[tokenId] /
                 winnerStreamTimes[tokenId][winners[i]].timeSpent;
 
@@ -94,6 +107,10 @@ contract Winner {
         }
     }
 
+    function canFetchShares(uint256 tokenId) private {
+        canFetch[tokenId] = true;
+    }
+
     //setWinner should only be called by tree address
     function setWinners(
         uint256 tokenID,
@@ -103,9 +120,8 @@ contract Winner {
         uint8 currentGrowth,
         uint8 maxGrowth
     ) external returns (bool __isWon, address __winner) {
-        console.log("Inside setWinners %s and tokenid is %s", latestFlowCap, tokenID%(2**32 -1));
 
-        require(msg.sender == tree,"Not the tree");
+        require(msg.sender == tree, "Not the tree");
         if (isStopped) {
             winnerStreamTimes[tokenID][gardener].timeSpent =
                 block.timestamp -
@@ -132,7 +148,7 @@ contract Winner {
                     block.timestamp -
                     totalTimeSpent[tokenID];
                 //the gnomes have won vs the system
-                setShares(tokenID);
+                canFetchShares(tokenID);
                 return (true, address(0));
             } else {
                 //alas, a gardener has taken a tree from the forest
@@ -140,7 +156,6 @@ contract Winner {
                 //for now we just use winner 0
                 uint256 randomNumber = IGrow(tellor).getRandomNumber() %
                     winners.length;
-                console.log("The randomNumber is %s", randomNumber);
                 address winner = winners[randomNumber];
                 return (true, winner);
             }

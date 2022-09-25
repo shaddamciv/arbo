@@ -8,12 +8,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./interfaces/IWinner.sol";
 import "./interfaces/ITree.sol";
-//TOTEST: Remove zero waterer from subgraph
-//TOTEST: Make watering plants time based
 
-//TODO: Add Tellor Contract in testing, also need to send tip tx into their discord
-//TODO: Deploy and test on optimism
-//TODO: Change font xmtp
+
 /// @title Tree NFT, derived from tradeable cashflow as a starter
 /// @notice Inherits the ERC721 NFT interface from Open Zeppelin and the RedirectAll logic to
 /// redirect all incoming streams to the current NFT holder.
@@ -58,7 +54,7 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         _mint(address(this), tokenId);
         emit Watered(address(this), tokenId, 0, 0, maxGrowth, 0);
         trees[tokenId].maxGrowth = maxGrowth;
-        IWinner(winnerContractAddress).initalizeIndex(0);
+        IWinner(winnerContractAddress).initalizeIndex(uint32(tokenId));
     }
 
     function withdrawFunds(uint256 tokenId) external {
@@ -122,50 +118,27 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         }
     }
 
-    // ---------------------------------------------------------------------------------------------
-    // BEFORE TOKEN TRANSFER CALLBACK
-
-    /// @dev Before transferring the NFT, set the token receiver to be the stream receiver as
-    /// defined in `RedirectAll`.
-    /// @param to New receiver.
-    function _beforeTokenTransfer(
-        address, // from
-        address to,
-        uint256 // tokenId
-    ) internal override {
-        // transfer the flow to the new owner
-        // _collectFees();
-
-        // if (to != address(this)) _changeReceiver(to);
-        // here we need to add a function to collect some fees for BCT token retirements and the small gardeners
-    }
-
-    function _collectFees() public payable {
-        require(msg.value == 0.01 ether, 'Only 0.01 nativeToken required to be transfered.');
-        payable(owner()).transfer(msg.value);
-    }
-
     //1 DAI - Small sprite - we will pay him a fee when the winner withdraws
     //list of small sprites will be in a  pool
     // if the same user tries to increase flow it has to be 10 times else revert
     function flowCap(int96 a) public pure returns (uint8) {
         uint8 growBy = 0;
-        if (a > 0 && a <= 100) {
-            growBy = 1;
-        } else if (a > 100 && a <= 1000) {
-            growBy = 2;
+        if (a > 10000000 && a <= 100000000) {
+            growBy = 25;
+        } else if (a > 1000000 && a <= 10000000) {
+            growBy = 5; 
         } else if (a > 10000 && a <= 100000) {
             growBy = 3;
-        } else if (a > 1000000 && a <= 10000000) {
-            growBy = 5;
-        } else if (a > 10000000 && a <= 100000000) {
-            growBy = 10;
+        } else if (a > 100 && a <= 1000) {
+            growBy = 2;
+        } else if(a > 0 ) {
+            return 1;
         }
         return growBy;
     }
 
     function getBoost() public view returns (uint8) {
-        return uint8(block.number % 10);
+        return uint8(block.number % 10) + 1;
         //we can use tellor here as well
     }
 }

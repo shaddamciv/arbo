@@ -45,7 +45,7 @@ const config: HardhatUserConfig = {
       forking: {
         enabled: true,
         url: process.env.MUMBAI_URL || "",
-        blockNumber: 28286817
+        blockNumber: 28287136
       },
     },
     goerli: {
@@ -66,9 +66,12 @@ const config: HardhatUserConfig = {
       gasPrice: 99000000000,
       accounts,
     },
-    mainnet: {
-      url: process.env.MAINNET_URL || "",
-      gasPrice: 13000000000,
+    optimism: {
+      url: process.env.OPTIMISM_URL || "",
+      accounts,
+    },
+    optimismg: {
+      url: "https://opt-goerli.g.alchemy.com/v2/CiMm_1wB4r93bBum4xvF2xGgIu0lT2OL",
       accounts,
     },
   },
