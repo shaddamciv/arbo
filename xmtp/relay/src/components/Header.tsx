@@ -3,7 +3,7 @@ import Head from 'next/head';
 const Header = (): JSX.Element => {
   return (
     <Head>
-      <title>Relay</title>
+      <title>ARBO</title>
       <link
         rel="apple-touch-icon"
         sizes="180x180"

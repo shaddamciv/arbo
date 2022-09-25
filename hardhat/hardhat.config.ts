@@ -44,8 +44,8 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         enabled: true,
-        url: process.env.MUMBAI_URL || "",
-        blockNumber: 27922496
+        url: process.env.OPTIMISM_URL || "",
+        blockNumber: 152882
       },
     },
     goerli: {

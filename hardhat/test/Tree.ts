@@ -26,6 +26,7 @@ let daix
 let superSigner
 let Tree
 let winner
+let grow
 
 const errorHandler = err => {
     if (err) throw err
@@ -77,11 +78,19 @@ before(async function () {
     dai = new ethers.Contract(daiAddress, daiABI, accounts[0])
     let App = await ethers.getContractFactory("Tree", accounts[0])
 
-    const Grow = await ethers.getContractFactory("Grow");
-    const grow = await Grow.deploy("0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A", 
-                                    "0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A",
-                                    "0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A",
-                                    1000);
+    const Grow = await ethers.getContractFactory("Grow");    
+    const Grow_OP = await ethers.getContractFactory("GrowOptimistic");
+    if(process.env.NETWORK !== "OP") {
+        grow = await Grow.deploy("0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A", 
+        "0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A",
+        "0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A",
+        1000);
+    }
+    else{
+        console.log("Deploying to optimism")
+        grow = await Grow_OP.deploy();
+        
+    }
     console.log("The Grow address is - ", grow.address)
 
 
