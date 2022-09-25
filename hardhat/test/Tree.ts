@@ -25,6 +25,7 @@ let dai
 let daix
 let superSigner
 let Tree
+let winner
 
 const errorHandler = err => {
     if (err) throw err
@@ -82,8 +83,12 @@ before(async function () {
                                     "0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A",
                                     1000);
     console.log("The Grow address is - ", grow.address)
+
+
     const Winner = await ethers.getContractFactory("Winner");
-    const winner = await Winner.deploy(grow.address);
+    winner = await Winner.deploy( grow.address,
+        sf.settings.config.hostAddress, // Getting the Goerli Host contract address from the Framework object
+    daix.address);
     console.log("The winner address is - ", winner.address)
     Tree = await App.deploy(
         "Grow ARBO",
@@ -94,12 +99,13 @@ before(async function () {
     )
 
     await winner.setTree(Tree.address);
+
 })
 
 beforeEach(async function () {
     await dai
         .connect(accounts[0])
-        .mint(accounts[0].address, ethers.utils.parseEther("1001"))
+        .mint(accounts[0].address, ethers.utils.parseEther("1011"))
 
     await dai
         .connect(accounts[0])
@@ -130,6 +136,8 @@ beforeEach(async function () {
         providerOrSigner: accounts[0]
     })
     console.log("daix bal for acct 0: ", daiBal)
+
+    await daix.transfer(accounts[0].address,winner.address, ethers.utils.parseEther("10"))
 })
 
 describe("watering plants", async function () {
@@ -159,7 +167,7 @@ describe("watering plants", async function () {
 
         assert.closeTo(parseInt(afterFlowTreeData[0].toString()), 10, 10, "Tree has not grown by a correct amount")
     })
-    it("Case #1.a - Bob waters arbo", async () => {
+    it("Case #2 - Bob waters arbo", async () => {
         console.log("Tree address - ",Tree.address, "Bobs's Address is - ", accounts[1].address)
 
         const initialTreeData = await Tree.trees(ethers.BigNumber.from("0"))
@@ -179,9 +187,20 @@ describe("watering plants", async function () {
         assert.closeTo(parseInt(afterFlowTreeData[0].toString()), 10, 20, "Tree has not grown by a correct amount")
     })
     //Assumption is the initial tree was planted with max Growth of 35
-    it("Case #2 - Alice can win the arbo", async () => {
+    it("Case #3 - Alice can win the arbo", async () => {
         console.log("Tree address - ",Tree.address, "Alice's Address is - ", accounts[0].address)
+        console.log("Stopping Bob!!")
+        const stopFlowOperation3 = sf.cfaV1.deleteFlow({
+            sender: accounts[1].address,
+            receiver: Tree.address,
+            superToken: daix.address
+        })
 
+        const stopFlowOperation3Txn = await stopFlowOperation3.exec(
+            accounts[1]
+        )
+
+        await stopFlowOperation3Txn.wait()
         const initialTreeData = await Tree.trees(ethers.BigNumber.from("0"))
 
         const createFlowOperation = sf.cfaV1.updateFlow({
@@ -209,7 +228,7 @@ describe("watering plants", async function () {
         await stopFlowOperation2Txn.wait()
         assert.equal(afterFlowTreeData[2].toString(), "1", "Tree was not won")
     })
-    it("Case #3 - Alice can win and withdraw", async () => {
+    it("Case #4 - Alice can win and withdraw", async () => {
         const account0BalanceInit = await daix.balanceOf({
             account: accounts[0].address,
             providerOrSigner: accounts[0]
