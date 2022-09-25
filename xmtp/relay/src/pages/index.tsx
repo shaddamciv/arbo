@@ -52,7 +52,7 @@ export default function Landing() {
       if (doRedirectBack) {
         doRedirectBack();
       } else {
-        router.push('/g/a4dbb373-f013-4c86-8b47-b4c77d7455b2');
+        router.push('/g/66f1dc12-b031-4577-bf91-7b59221c1783');
       }
     }
     /* eslint-disable-next-line */
