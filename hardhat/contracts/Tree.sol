@@ -8,7 +8,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./interfaces/IWinner.sol";
 import "./interfaces/ITree.sol";
-import "hardhat/console.sol";
 //TOTEST: Remove zero waterer from subgraph
 //TOTEST: Make watering plants time based
 
@@ -39,17 +38,17 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
 
     mapping(uint256 => ITree.TreeMeta) public trees;
     uint256 public prevBalance;
-    address public winner;
+    address public winnerContractAddress;
 
     constructor(
         string memory _name,
         string memory _symbol,
         ISuperfluid host,
         ISuperToken acceptedToken,
-        address _winner
+        address _winnerContractAddress
     ) ERC721(_name, _symbol) RedirectAll(host, acceptedToken) {
+        winnerContractAddress = _winnerContractAddress;
         plantATree(35);
-        winner = _winner;
     }
 
     function plantATree(uint8 maxGrowth) public onlyOwner {
@@ -59,6 +58,7 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         _mint(address(this), tokenId);
         emit Watered(address(this), tokenId, 0, 0, maxGrowth, 0);
         trees[tokenId].maxGrowth = maxGrowth;
+        IWinner(winnerContractAddress).initalizeIndex(0);
     }
 
     function withdrawFunds(uint256 tokenId) external {
@@ -80,8 +80,6 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
         ITree.TreeMeta storage myTree = trees[tokenId];
 
         require(myTree.isWon == 0, "This ARBO is already grown!");
-        console.log("The flow rate %s", isStopped);
-        console.logInt(flowRate);
         uint8 latestFlowCap = flowCap(flowRate);
         uint8 amountWateredInTotal = latestFlowCap * getBoost(); // a not so random boost to the growth of the tree
         myTree.currentGrowth =
@@ -96,7 +94,7 @@ contract Tree is ERC721, ERC721Holder, Ownable, RedirectAll {
             inNetFlowRate
         );
 
-        (bool isWon, address winningAddress) = IWinner(winner).setWinners(
+        (bool isWon, address winningAddress) = IWinner(winnerContractAddress).setWinners(
             tokenId,
             latestFlowCap,
             gardener,

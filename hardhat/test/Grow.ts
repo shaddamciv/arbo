@@ -18,20 +18,28 @@ describe("Lock", function () {
     const [owner, otherAccount] = await ethers.getSigners();
 
     const Grow = await ethers.getContractFactory("Grow");
-    const grow = await Grow.deploy("0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A");
+    // const grow = await Grow.deploy("0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A");
+    const grow = await Grow.attach("0x18FBeB37FaBBaA67CA55a9bA10eB6D4ec0052105");
 
     return { grow, owner, otherAccount };
   }
 
   describe("Deployment", function () {
     //we used the frontend to generate query id and then pushed 333333 as a value to test
-    it("Should set the MaticPrice", async function () {
+    xit("Should set the MaticPrice", async function () {
       const { grow } = await loadFixture(deployOneYearLockFixture);
       await grow.getRandomNumber();
       const randomNumber = await grow.nativeTokenPrice();
       console.log(randomNumber);
       expect(randomNumber).to.equal(333333);
     });
-
+    //we used the frontend to generate query id and then pushed 333333 as a value to test
+    it("Should request for a random number", async function () {
+      const { grow } = await loadFixture(deployOneYearLockFixture);
+      await grow.requestRandomNumber(1664097140);
+      // const randomNumber = await grow.getRandomNumber();
+      // console.log(randomNumber);
+      // expect(randomNumber).to.equal(333333);
+    });
   })
 });

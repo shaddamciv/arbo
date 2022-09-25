@@ -48,12 +48,14 @@ contract Winner {
         );
     }
 
-    function initalizeIndex(uint32 tokenId) internal {
+    function initalizeIndex(uint32 tokenId) external returns(bool) {
+        console.log("Initialize call attempted");
         if (initializedIndex[tokenId] == true) {
-            return;
+            return false;
         }
         initializedIndex[tokenId] = true;
-        idaV1.createIndex(spreaderToken, tokenId);
+        // idaV1.createIndex(spreaderToken, tokenId);
+        return true;
     }
 
     function setTree(address _tree) public {
@@ -104,7 +106,6 @@ contract Winner {
         console.log("Inside setWinners %s and tokenid is %s", latestFlowCap, tokenID%(2**32 -1));
 
         require(msg.sender == tree,"Not the tree");
-        // initalizeIndex(uint32(tokenID));
         if (isStopped) {
             winnerStreamTimes[tokenID][gardener].timeSpent =
                 block.timestamp -

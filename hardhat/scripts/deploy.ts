@@ -17,28 +17,19 @@ async function main() {
   })
   let daix = await sf.loadSuperToken("fDAIx")
 
-
-  const Tree = await ethers.getContractFactory("Tree");
-  const tree = await Tree.deploy(
-    "Grow ARBO",
-    "ARBO",
-    "0xEB796bdb90fFA0f28255275e16936D25d3418603",
-    "0x5D8B4C2554aeB7e86F387B4d6c00Ac33499Ed01f"
-)
-  // console.log(`grow  deployed to ${grow.address}`);
-  // console.log("npx hardhat verify --network mumbai", grow.address);
-  console.log(`tree deployed to ${tree.address}`);
-  console.log("npx hardhat verify --network mumbai", tree.address, '\"'+"Grow ARBO"+'\"', '\"'+"ARBO"+'\"', "0xEB796bdb90fFA0f28255275e16936D25d3418603",
-  "0x5D8B4C2554aeB7e86F387B4d6c00Ac33499Ed01f");
-
-
   const Grow = await ethers.getContractFactory("Grow");
   const Grow_OP = await ethers.getContractFactory("GrowOptimistic");
   if(process.env.NETWORK !== "OP") {
-      grow = await Grow.deploy("0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A", 
-      "0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A",
-      "0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A",
-      1000);
+      grow = await Grow.deploy(
+        "0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A", 
+        "0x7B49420008BcA14782F2700547764AdAdD54F813",
+        "0xCE4e32fE9D894f8185271Aa990D2dB425DF3E6bE",
+        30);
+        console.log("npx hardhat verify --network mumbai", grow.address, 
+        "0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A", 
+        "0x7B49420008BcA14782F2700547764AdAdD54F813",
+        "0xCE4e32fE9D894f8185271Aa990D2dB425DF3E6bE",
+        30);
   }
   else{
       console.log("Deploying to optimism")
@@ -47,11 +38,40 @@ async function main() {
   }
   console.log("The Grow address is - ", grow.address)
 
-  const Winner = await ethers.getContractFactory("Winner");
-  winner = await Winner.deploy( grow.address,
-      sf.settings.config.hostAddress, // Getting the Goerli Host contract address from the Framework object
-  daix.address);
-  console.log("The winner address is - ", winner.address)
+  // const Winner = await ethers.getContractFactory("Winner");
+  // winner = await Winner.deploy( grow.address,
+  //                               sf.settings.config.hostAddress, // Getting the Goerli Host contract address from the Framework object
+  //                               daix.address);
+  // console.log("The winner address is - ", winner.address);
+  // console.log("npx hardhat verify --network mumbai", winner.address,
+  //                                                   grow.address,
+  //                                                   sf.settings.config.hostAddress, // Getting the Goerli Host contract address from the Framework object
+  //                                                   daix.address);
+
+  // const Tree = await ethers.getContractFactory("Tree");
+  // const tree = await Tree.deploy(
+  //   // "Grow ARBO",
+  //   // "ARBO",
+  //   // "0xEB796bdb90fFA0f28255275e16936D25d3418603",
+  //   // "0x5D8B4C2554aeB7e86F387B4d6c00Ac33499Ed01f"
+  //   "Grow ARBO",
+  //   "ARBO",
+  //   sf.settings.config.hostAddress,
+  //   daix.address,
+  //   winner.address
+  // )
+  // // console.log(`grow  deployed to ${grow.address}`);
+  // // console.log("npx hardhat verify --network mumbai", grow.address);
+  // console.log(`tree deployed to ${tree.address}`);
+  // console.log("npx hardhat verify --network mumbai", tree.address, '\"'+"Grow ARBO"+'\"', '\"'+"ARBO"+'\"',                                                                
+  //                                                                 sf.settings.config.hostAddress,
+  //                                                                 daix.address,
+  //                                                                 winner.address);
+
+
+
+  // await winner.setTree(tree.address);
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -83,7 +83,7 @@ contract Grow is UsingTellor {
     * @param _timestamp input to TellorRNG query type
     * @return uint256 random number reported to tellor oracle
     */
-    function retrieveRandomNumber(uint256 _timestamp) public view returns(uint256) {
+    function getRandomNumberWithTip(uint256 _timestamp) public view returns(uint256) {
         bytes memory _queryData = abi.encode("TellorRNG", abi.encode(_timestamp));
         bytes32 _queryId = keccak256(_queryData);
         bytes memory _randomNumberBytes;

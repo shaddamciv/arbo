@@ -106,7 +106,7 @@ before(async function () {
         daix.address,
         winner.address
     )
-
+        
     await winner.setTree(Tree.address);
 
 })
