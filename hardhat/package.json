@@ -4,6 +4,7 @@
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
     "@nomicfoundation/hardhat-toolbox": "latest",
     "hardhat": "latest",
+    "hardhat-gas-reporter": "^1.0.9",
     "ts-node": "^10.9.1"
   },
   "dependencies": {

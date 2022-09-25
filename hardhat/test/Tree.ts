@@ -262,7 +262,7 @@ describe("watering plants", async function () {
 
     })
     //test this separately using it.only
-    xit("Case #5 - Both Alice and Bob wins an IDA", async () => {
+    it.only("Case #5 - Both Alice and Bob wins an IDA", async () => {
         
         const plantAnIDATree = await Tree.plantATree(ethers.BigNumber.from("15"));
         const createFlowOperation = sf.cfaV1.createFlow({

@@ -46,8 +46,8 @@ async function main() {
   // console.log("The Grow address is - ", grow.address)
   // console.log("The daix address is - ", daix.address)
 
-  const Winner = await ethers.getContractFactory("Winner");
-  winner = await Winner.attach("0xe97A434341f839079d15543008F98Aad016d5d64");
+   const Winner = await ethers.getContractFactory("Winner");
+   winner = await Winner.attach("0xe97A434341f839079d15543008F98Aad016d5d64");
   // winner = await Winner.deploy( grow.address,
   //                               sf.settings.config.hostAddress, // Getting the Goerli Host contract address from the Framework object
   //                               daix.address);
@@ -57,7 +57,7 @@ async function main() {
   //                                                   sf.settings.config.hostAddress, // Getting the Goerli Host contract address from the Framework object
   //                                                   daix.address);
 
-  const Tree = await ethers.getContractFactory("Tree");
+  const Tree = await ethers.getContractFactory("TreeOP");
   const tree = await Tree.deploy(
     // "Grow ARBO",
     // "ARBO",
@@ -65,18 +65,18 @@ async function main() {
     // "0x5D8B4C2554aeB7e86F387B4d6c00Ac33499Ed01f"
     "Grow ARBO",
     "ARBO",
-    sf.settings.config.hostAddress,
+    // sf.settings.config.hostAddress,
     // daix.address,
     // winner.address
-    "0x7d342726B69C28D942ad8BfE6Ac81b972349d524",
+    // "0x7d342726B69C28D942ad8BfE6Ac81b972349d524",
     "0xe97A434341f839079d15543008F98Aad016d5d64"
   )
   // console.log(`grow  deployed to ${grow.address}`);
   // console.log("npx hardhat verify --network optimism", grow.address);
   console.log(`tree deployed to ${tree.address}`);
   console.log("npx hardhat verify --network optimism", tree.address, '\"'+"Grow ARBO"+'\"', '\"'+"ARBO"+'\"',                                                                
-                                                                  sf.settings.config.hostAddress,
-                                                                  "0x7d342726B69C28D942ad8BfE6Ac81b972349d524",
+                                                                  // sf.settings.config.hostAddress,
+                                                                  // "0x7d342726B69C28D942ad8BfE6Ac81b972349d524",
                                                                   "0xe97A434341f839079d15543008F98Aad016d5d64"
                                                                   // daix.address,
                                                                   // winner.address

@@ -44,8 +44,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         enabled: true,
-        url: process.env.MUMBAI_URL || "",
-        blockNumber: 28287136
+        url: process.env.OPTIMISM_URL || "",
       },
     },
     goerli: {
@@ -70,8 +69,9 @@ const config: HardhatUserConfig = {
       url: process.env.OPTIMISM_URL || "",
       accounts,
     },
-    optimismg: {
-      url: "https://opt-goerli.g.alchemy.com/v2/CiMm_1wB4r93bBum4xvF2xGgIu0lT2OL",
+    optimismk: {
+      url: "https://kovan.optimism.io",
+      gasPrice: 30000000000,
       accounts,
     },
   },
@@ -80,6 +80,11 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 180000
+  },
+  gasReporter: {
+    currency: 'USD',
+    gasPrice: 30,
+    enabled: (process.env.REPORT_GAS) ? true : false
   }
 };
 

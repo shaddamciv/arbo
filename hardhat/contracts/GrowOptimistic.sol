@@ -9,7 +9,7 @@ contract GrowOptimistic {
 
     //Not very random
     function getRandomNumber() public returns(uint256) {
-        uint random = uint(keccak256(abi.encodePacked(block.timestamp))) % 100;
+        uint random = uint(keccak256(abi.encodePacked(block.timestamp))) % 10000 + 1;
 
         return random;
     }

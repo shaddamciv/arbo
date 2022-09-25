@@ -33,26 +33,16 @@ All excess fees and profit will be used for funding the next round and for retir
 
 As a winner I can redeem the NFT and claim outflow by paying a fee. The fee goes 5% to protocol, 95% to other players.
 
-## Development Phases
-Phase 1 -> Keep all code via web3 calls - Hit a snag on the graph, so worked around via websockets + graph clients
-Phase 2 -> Deploy on optimism and polygon - Polygon done, next optimism
-Phase 3 -> Change to ACL superfluid to improve game UX - Superfluid CFA done, ACL Moved to stretch goal post hack
-
-## Reference Libraries used
-1. We used https://github.com/relaycc/relay for the xmtp chat client
-2. We used graph-client/javascript-cjs for the graph-relayer module
-
-## Tests
-cd hardhat
-npx hardhat test test/Tree.ts
-
-
 ## Deployed Address
 
-Polygon V1  - Used for Demo video
+Mumbai Polygon V1  - Used for Demo video
 https://mumbai.polygonscan.com/address/0xaa19610d44b7ef574faeeca5e1a77d4bb7d8b8c2
 
-Polygon V2
+
+Mumbai Polygon V2
+The tree address is - 0x24cC5458323Ba7F82E5de48D2D5A4363d586077E
+The Tellor oracle address  0xf753e8F555c3E624100337B0438878f375bc0053
+
 npx hardhat verify --network mumbai 0x24cC5458323Ba7F82E5de48D2D5A4363d586077E "Grow ARBO" "ARBO" 0xCb0Ff4D0cA186f0Fc0301258066Fe3fA258417a6 0xEA34d7113DcE4e7A563dcA021532f66E7328F51D 0x7A6B9B4FF950D92126B1B37abC217d86738C5C65
 npx hardhat verify --network mumbai 0xf753e8F555c3E624100337B0438878f375bc0053 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A 0x7B49420008BcA14782F2700547764AdAdD54F813 0xCE4e32fE9D894f8185271Aa990D2dB425DF3E6bE 30
 npx hardhat verify --network mumbai 0x7A6B9B4FF950D92126B1B37abC217d86738C5C65 0xf753e8F555c3E624100337B0438878f375bc0053 0xCb0Ff4D0cA186f0Fc0301258066Fe3fA258417a6 0xEA34d7113DcE4e7A563dcA021532f66E7328F51D
@@ -62,4 +52,15 @@ Optimism
 The Grow address is -  0xfca0C8Cf26e8045eb472D7e3015Af73c2B1C03Ba
 The daix address is -  0x7d342726B69C28D942ad8BfE6Ac81b972349d524
 The winner address is -  0xe97A434341f839079d15543008F98Aad016d5d64
+The tree address is - 0x7d363EA1F74C5323730c130d9d37d336C860079A
 npx hardhat verify --network optimism 0xe97A434341f839079d15543008F98Aad016d5d64 0xfca0C8Cf26e8045eb472D7e3015Af73c2B1C03Ba 0x567c4B141ED61923967cA25Ef4906C8781069a10 0x7d342726B69C28D942ad8BfE6Ac81b972349d524
+npx hardhat verify --network optimism 0x7d363EA1F74C5323730c130d9d37d336C860079A "Grow ARBO" "ARBO" 0xe97A434341f839079d15543008F98Aad016d5d64
+
+## Reference Libraries used
+1. We used https://github.com/relaycc/relay for the xmtp chat client
+2. We used graph-client/javascript-cjs for the graph-relayer module
+
+## Tests
+cd hardhat
+npx hardhat test test/Tree.ts
+
